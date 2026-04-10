@@ -1492,6 +1492,8 @@
     var self = this;
     var map = {38:0,39:1,40:2,37:3,75:0,76:1,74:2,72:3,87:0,68:1,83:2,65:3};
     document.addEventListener('keydown', function(e) {
+      var tag = document.activeElement && document.activeElement.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
       if (!e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey && map[e.which] !== undefined) {
         e.preventDefault();
         self.emit('move', map[e.which]);
