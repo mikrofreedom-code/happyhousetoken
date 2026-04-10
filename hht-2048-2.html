@@ -930,7 +930,6 @@
         </div>
       </div>
       <button class="btn-leaderboard" onclick="toggleLeaderboard()">🏆 Leaderboard</button>
-      <button class="btn-leaderboard" onclick="resetPlayer()" style="border-color:rgba(255,26,170,0.4);color:#ff1aaa;margin-left:6px;">↺ Reset</button>
     </div>
 
     <div class="above-game">
@@ -1013,9 +1012,8 @@
   var SEASONS_TABLE = 'hht_2048_seasons';
 
   // Season config
-  var SEASON_DURATION_MS = 5 * 24 * 60 * 60 * 1000;  // 5 days
+  var SEASON_END_DATE    = new Date('2026-04-10T20:00:00Z'); // Piatok 10.4.2026 22:00 SK
   var LOCKDOWN_MS        = 5 * 60 * 1000;            // 5 minutes
-  var ARCHIVE_TABLE      = 'hht_2048_archive';
 
   // ══════════════════════════════════════════════
   // SUPABASE HELPERS
@@ -1030,10 +1028,7 @@
         'Prefer': method === 'POST' ? 'return=representation' : ''
       },
       body: body ? JSON.stringify(body) : undefined
-    }).then(function(r) {
-      if (method === 'DELETE' || r.status === 204) return null;
-      return r.json();
-    });
+    }).then(function(r) { return r.json(); });
   }
 
   // ══════════════════════════════════════════════
@@ -1076,7 +1071,7 @@
 
   async function createNewSeason(number) {
     var now = new Date();
-    var endsAt = new Date(now.getTime() + SEASON_DURATION_MS);
+    var endsAt = SEASON_END_DATE;
     try {
       var result = await sbFetch('POST', SEASONS_TABLE, {
         number: number,
@@ -1090,18 +1085,8 @@
           startedAt: now.getTime(),
           endsAt: endsAt.getTime()
         };
-        // Archive scores before reset
-        try {
-          var existing = await sbFetch('GET', TABLE_NAME + '?best_score=gt.0&select=id,name,wallet,best_score');
-          if (Array.isArray(existing) && existing.length > 0) {
-            var archiveRows = existing.map(function(row) {
-              return { player_id: row.id, name: row.name, wallet: row.wallet, best_score: row.best_score, season_number: number - 1, archived_at: now.toISOString() };
-            });
-            await sbFetch('POST', ARCHIVE_TABLE, archiveRows);
-          }
-        } catch(ae) { console.warn('Archive failed:', ae); }
-        // Delete all rows for clean leaderboard
-        await sbFetch('DELETE', TABLE_NAME + '?id=neq.00000000-0000-0000-0000-000000000000');
+        // Reset all scores for new season
+        await sbFetch('PATCH', TABLE_NAME + '?best_score=gte.0', { best_score: 0, season_id: currentSeason.id });
         startCountdown();
         loadLeaderboard();
       }
@@ -1325,15 +1310,6 @@
     }
   }
 
-  function resetPlayer() {
-    localStorage.removeItem('hht2048Player');
-    player = null;
-    document.getElementById('playerBar').classList.add('hidden');
-    document.getElementById('overlay').classList.remove('hidden');
-    connectedWallet = null;
-    initMobileCheck();
-  }
-
   function changeWallet() {
     connectedWallet = null;
     document.getElementById('walletConnected').classList.add('hidden');
@@ -1442,30 +1418,14 @@
   // ══════════════════════════════════════════════
   async function submitScore(score) {
     if (!player) return;
-    if (isLockdown()) return;
+    if (isLockdown()) return; // 🔒 blocked during lockdown
     try {
-      // Check if player still exists (wiped after season reset)
-      var check = await sbFetch('GET', TABLE_NAME + '?id=eq.' + player.id + '&select=id');
-      if (!Array.isArray(check) || check.length === 0) {
-        // Re-register automatically
-        var existing = await sbFetch('GET', TABLE_NAME + '?wallet=eq.' + encodeURIComponent(player.wallet) + '&select=id,name,wallet');
-        if (Array.isArray(existing) && existing.length > 0) {
-          player = { id: existing[0].id, name: existing[0].name, wallet: existing[0].wallet };
-        } else {
-          var result = await sbFetch('POST', TABLE_NAME, { name: player.name, wallet: player.wallet, best_score: 0 });
-          if (Array.isArray(result) && result[0]) {
-            player = { id: result[0].id, name: result[0].name, wallet: result[0].wallet };
-          }
-        }
-        savePlayerToStorage(player);
-        showPlayerBar(player);
-      }
       await sbFetch('PATCH',
         TABLE_NAME + '?id=eq.' + player.id + '&best_score=lt.' + score,
         { best_score: score }
       );
       if (lbVisible) loadLeaderboard();
-    } catch(e) { console.error('submitScore error:', e); }
+    } catch(e) { /* silent */ }
   }
 
   // ══════════════════════════════════════════════
@@ -1506,8 +1466,6 @@
     var self = this;
     var map = {38:0,39:1,40:2,37:3,75:0,76:1,74:2,72:3,87:0,68:1,83:2,65:3};
     document.addEventListener('keydown', function(e) {
-      var tag = document.activeElement && document.activeElement.tagName;
-      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
       if (!e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey && map[e.which] !== undefined) {
         e.preventDefault();
         self.emit('move', map[e.which]);
