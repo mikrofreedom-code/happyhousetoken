@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VIP Arena | HHT</title>
+  <link rel="icon" type="image/png" href="images/hht-icon.png">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    /* ── HHT ARENA NAV ── */
+    .hht-live-banner {
+      position: fixed; top:0; left:0; right:0; height:36px;
+      background: rgba(16,0,36,0.97);
+      border-bottom: 2px solid #ff1aaa;
+      box-shadow: 0 0 28px rgba(255,26,170,0.5);
+      display: flex; align-items: center; justify-content: center; gap:16px;
+      z-index: 9100;
+    }
+    .hht-live-dot { width:9px;height:9px;background:#3dff00;border-radius:50%;box-shadow:0 0 10px #3dff00,0 0 22px #3dff00;animation:hht-pulse 1.2s ease-in-out infinite; }
+    @keyframes hht-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.2;transform:scale(.55)}}
+    .hht-live-text { font-family:'Press Start 2P',monospace;font-size:.5rem;letter-spacing:3px;color:#00f0ff;text-shadow:0 0 14px #00f0ff; }
+    .hht-live-buy { font-family:'Press Start 2P',monospace;font-size:.46rem;color:#000;background:#ffe900;padding:5px 12px;border-radius:3px;text-decoration:none;box-shadow:0 0 16px rgba(255,233,0,.6);transition:box-shadow .2s; }
+    .hht-live-buy:hover { box-shadow:0 0 32px rgba(255,233,0,.9); }
+    .hht-nav {
+      position: fixed; top:36px; left:0; right:0; z-index:9000;
+      padding: 13px 32px;
+      display: flex; align-items:center; justify-content:space-between;
+      background: rgba(16,0,36,0.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(0,240,255,0.18);
+      box-shadow: 0 2px 40px rgba(0,0,0,.9);
+    }
+    .hht-nav-logo { font-family:'Press Start 2P',monospace;font-size:.85rem;color:#ffe900;text-shadow:0 0 14px #ffe900;text-decoration:none;display:flex;align-items:center;gap:10px; }
+    .hht-nav-right { display:flex;align-items:center;gap:16px; }
+    .hht-nav-back { color:#9080b8;text-decoration:none;font-family:'Press Start 2P',monospace;font-size:.44rem;letter-spacing:2px;text-transform:uppercase;transition:color .2s; }
+    .hht-nav-back:hover { color:#00f0ff;text-shadow:0 0 8px #00f0ff; }
+    .hht-nav-buy { font-family:'Press Start 2P',monospace;font-size:.4rem;color:#ff1aaa;border:2px solid #ff1aaa;background:transparent;border-radius:3px;padding:8px 13px;text-decoration:none;text-shadow:0 0 8px #ff1aaa;box-shadow:0 0 14px rgba(255,26,170,.3);transition:all .2s;white-space:nowrap; }
+    .hht-nav-buy:hover { background:rgba(255,26,170,.12);box-shadow:0 0 28px rgba(255,26,170,.7); }
+    @media(max-width:600px){
+      .hht-nav{padding:10px 16px;}
+      .hht-nav-logo{font-size:.65rem;}
+    }
+
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap');
+
+    :root {
+      --gold: #FFD700;
+      --gold-dim: #b8960c;
+      --gold-glow: rgba(255, 215, 0, 0.35);
+      --bg: #050608;
+      --bg2: #0a0c10;
+      --panel: rgba(10, 12, 18, 0.92);
+      --border: rgba(255, 215, 0, 0.2);
+      --border-bright: rgba(255, 215, 0, 0.6);
+      --text: #e8e0cc;
+      --text-dim: rgba(232, 224, 204, 0.5);
+      --danger: #ff4444;
+      --success: #00ff88;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Rajdhani', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* ── BACKGROUND ── */
+    .bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background-image: url('vip-bg.jpg');
+      background-size: cover;
+      background-position: center top;
+      background-repeat: no-repeat;
+    }
+
+    .bg::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom,
+          rgba(5,6,8,0.5) 0%,
+          rgba(5,6,8,0.72) 40%,
+          rgba(5,6,8,0.93) 100%);
+      pointer-events: none;
+    }
+
+    .bg::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,215,0,0.02) 40px),
+        repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,215,0,0.02) 40px);
+      pointer-events: none;
+    }
+
+    /* ── SCAN LINE EFFECT ── */
+    .scanlines {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 2px,
+        rgba(0,0,0,0.08) 2px,
+        rgba(0,0,0,0.08) 4px
+      );
+      pointer-events: none;
+    }
+
+    /* ── LAYOUT ── */
+    .page {
+      position: relative;
+      z-index: 2;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 20px 60px;
+      padding-top: 80px; /* nav offset */
+    }
+
+    /* ── HEADER ── */
+    header {
+      width: 100%;
+      max-width: 900px;
+      padding: 32px 0 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .back-link {
+      align-self: flex-start;
+      color: var(--text-dim);
+      text-decoration: none;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 14px;
+      letter-spacing: 0.1em;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.2s;
+      margin-bottom: 16px;
+    }
+    .back-link:hover { color: var(--gold); }
+
+    .crown {
+      font-size: 36px;
+      filter: drop-shadow(0 0 12px var(--gold));
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    .title {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(28px, 6vw, 52px);
+      font-weight: 900;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #FFD700 0%, #FFA500 40%, #FFD700 70%, #fff8dc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 20px rgba(255,215,0,0.4));
+    }
+
+    .subtitle {
+      font-size: 13px;
+      letter-spacing: 0.3em;
+      color: var(--text-dim);
+      text-transform: uppercase;
+    }
+
+    .gold-line {
+      width: 200px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      margin: 8px 0;
+    }
+
+    /* ── GATE SECTION ── */
+    .gate {
+      width: 100%;
+      max-width: 520px;
+      margin: 8px 0 40px;
+    }
+
+    .gate-panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      box-shadow:
+        0 0 40px rgba(255,215,0,0.05),
+        inset 0 1px 0 rgba(255,215,0,0.1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .gate-panel::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    }
+
+    .gate-icon {
+      font-size: 48px;
+      filter: drop-shadow(0 0 16px var(--gold));
+    }
+
+    .gate-title {
+      font-family: 'Orbitron', monospace;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--gold);
+      text-align: center;
+    }
+
+    .gate-desc {
+      font-size: 15px;
+      color: var(--text-dim);
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    .gate-desc strong {
+      color: var(--gold);
+      font-weight: 600;
+    }
+
+    /* ── WALLET STATUS ── */
+    #wallet-status {
+      width: 100%;
+      padding: 14px 18px;
+      border-radius: 10px;
+      background: rgba(255,215,0,0.05);
+      border: 1px solid var(--border);
+      font-size: 14px;
+      letter-spacing: 0.05em;
+      text-align: center;
+      color: var(--text-dim);
+      display: none;
+    }
+
+    #wallet-status.visible { display: block; }
+    #wallet-status.success { border-color: var(--success); color: var(--success); background: rgba(0,255,136,0.06); }
+    #wallet-status.error { border-color: var(--danger); color: var(--danger); background: rgba(255,68,68,0.06); }
+    #wallet-status.checking { border-color: var(--gold-dim); color: var(--gold); }
+
+    /* ── BUTTONS ── */
+    .btn {
+      width: 100%;
+      padding: 16px 24px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-family: 'Orbitron', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #c8960c, #FFD700, #c8960c);
+      color: #0a0800;
+      box-shadow: 0 4px 24px rgba(255,215,0,0.25);
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 4px 36px rgba(255,215,0,0.45);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary:active { transform: translateY(0); }
+
+    .btn-primary::after {
+      content: '';
+      position: absolute;
+      top: -50%; left: -60%;
+      width: 40%; height: 200%;
+      background: rgba(255,255,255,0.2);
+      transform: skewX(-20deg);
+      transition: left 0.4s;
+    }
+
+    .btn-primary:hover::after { left: 120%; }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--gold);
+      border: 1px solid var(--border-bright);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255,215,0,0.08);
+      border-color: var(--gold);
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    /* ── WALLET SELECTOR ── */
+    .wallet-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .wallet-btn {
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: rgba(255,215,0,0.04);
+      color: var(--text);
+      cursor: pointer;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.2s;
+    }
+
+    .wallet-btn:hover {
+      border-color: var(--gold);
+      background: rgba(255,215,0,0.08);
+      color: var(--gold);
+    }
+
+    .wallet-btn img {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+    }
+
+    .wallet-label {
+      font-size: 12px;
+      color: var(--text-dim);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-align: center;
+    }
+
+    /* ── GAMES GRID ── */
+    #vip-content {
+      display: none;
+      width: 100%;
+      max-width: 900px;
+      flex-direction: column;
+      align-items: center;
+      gap: 32px;
+    }
+
+    #vip-content.visible { display: flex; }
+
+    .section-label {
+      font-family: 'Orbitron', monospace;
+      font-size: 11px;
+      letter-spacing: 0.3em;
+      color: var(--gold-dim);
+      text-transform: uppercase;
+      text-align: center;
+    }
+
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 20px;
+      width: 100%;
+    }
+
+    .game-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 28px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      cursor: default;
+    }
+
+    .game-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .game-card:hover {
+      border-color: var(--border-bright);
+      box-shadow: 0 0 30px rgba(255,215,0,0.08);
+    }
+
+    .game-card:hover::before { opacity: 1; }
+
+    .game-card.playable { cursor: pointer; }
+
+    .game-icon {
+      font-size: 42px;
+      filter: drop-shadow(0 0 10px rgba(255,215,0,0.3));
+    }
+
+    .game-name {
+      font-family: 'Orbitron', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--gold);
+      text-align: center;
+    }
+
+    .game-desc {
+      font-size: 13px;
+      color: var(--text-dim);
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    .badge {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .badge-soon {
+      background: rgba(255,215,0,0.1);
+      border: 1px solid rgba(255,215,0,0.2);
+      color: var(--gold-dim);
+    }
+
+    .badge-live {
+      background: rgba(0,255,136,0.1);
+      border: 1px solid rgba(0,255,136,0.3);
+      color: var(--success);
+    }
+
+    /* ── CONNECTED BAR ── */
+    .connected-bar {
+      display: none;
+      width: 100%;
+      max-width: 900px;
+      background: rgba(0,255,136,0.05);
+      border: 1px solid rgba(0,255,136,0.2);
+      border-radius: 10px;
+      padding: 12px 20px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .connected-bar.visible { display: flex; }
+
+    .connected-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--success);
+    }
+
+    .connected-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 8px var(--success);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .connected-addr {
+      font-family: 'Orbitron', monospace;
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    .disconnect-btn {
+      background: transparent;
+      border: 1px solid rgba(255,68,68,0.3);
+      color: rgba(255,68,68,0.7);
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 11px;
+      cursor: pointer;
+      font-family: 'Rajdhani', sans-serif;
+      letter-spacing: 0.1em;
+      transition: all 0.2s;
+    }
+
+    .disconnect-btn:hover {
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    /* ── BUY SECTION ── */
+    .buy-bar {
+      width: 100%;
+      max-width: 520px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      text-align: center;
+    }
+
+    .buy-bar p {
+      font-size: 14px;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+
+    .buy-bar strong { color: var(--gold); }
+
+    .btn-buy {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 28px;
+      background: linear-gradient(135deg, #c8960c, #FFD700);
+      color: #0a0800;
+      border-radius: 8px;
+      text-decoration: none;
+      font-family: 'Orbitron', monospace;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      transition: all 0.2s;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-buy:hover {
+      box-shadow: 0 4px 20px rgba(255,215,0,0.4);
+      transform: translateY(-1px);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative;
+      z-index: 2;
+      padding: 24px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-dim);
+      letter-spacing: 0.1em;
+    }
+
+    footer a { color: var(--gold-dim); text-decoration: none; }
+    footer a:hover { color: var(--gold); }
+
+    /* ── SPINNER ── */
+    .spinner {
+      display: inline-block;
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,215,0,0.2);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 500px) {
+      .wallet-grid { grid-template-columns: 1fr; }
+      .gate-panel { padding: 24px 18px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="bg"></div>
+<div class="scanlines"></div>
+
+<!-- HHT ARENA NAV -->
+<div class="hht-live-banner">
+  <div class="hht-live-dot"></div>
+  <span class="hht-live-text">🏠 WE ARE LIVE</span>
+  <a href="https://pump.fun/coin/4KrNyA5FpFGQj4jQZh1yKzBkobq7mGVftWYVWjfwpump" target="_blank" class="hht-live-buy">BUY $HHT</a>
+</div>
+<nav class="hht-nav">
+  <a href="index.html" class="hht-nav-logo">
+    <img src="3873.png" style="height:26px;width:auto;filter:drop-shadow(0 0 8px rgba(255,233,0,.6));" alt="HHT"> HHT
+  </a>
+  <div class="hht-nav-right">
+    <a href="hht-arena.html" class="hht-nav-back">← ARENA</a>
+    <a href="https://pump.fun/coin/4KrNyA5FpFGQj4jQZh1yKzBkobq7mGVftWYVWjfwpump" target="_blank" class="hht-nav-buy">🚀 BUY $HHT</a>
+  </div>
+</nav>
+
+<div class="page">
+
+  <header>
+    <!-- back link now in nav -->
+    <div class="crown">👑</div>
+    <h1 class="title">VIP Arena</h1>
+    <div class="gold-line"></div>
+    <p class="subtitle">Exclusive access · HHT holders only</p>
+  </header>
+
+  <!-- CONNECTED BAR -->
+  <div class="connected-bar" id="connected-bar">
+    <div class="connected-info">
+      <div class="connected-dot"></div>
+      <span>Connected</span>
+      <span class="connected-addr" id="connected-addr"></span>
+    </div>
+    <button class="disconnect-btn" id="disconnect-btn">Disconnect</button>
+  </div>
+
+  <!-- GATE -->
+  <div class="gate" id="gate-section">
+    <div class="gate-panel">
+      <div class="gate-icon">🔐</div>
+      <div class="gate-title">Members Only</div>
+      <p class="gate-desc">
+        Connect your wallet to verify you hold<br>
+        <strong>1,000,000+ HHT tokens</strong> for VIP access.
+      </p>
+
+      <div id="wallet-status"></div>
+
+      <!-- Step 1: Choose wallet -->
+      <div id="step-connect" style="width:100%; display:flex; flex-direction:column; gap:12px;">
+        <div class="wallet-label">Connect wallet</div>
+        <div class="wallet-grid">
+          <button class="wallet-btn" onclick="connectWallet('phantom')">
+            <img src="https://raw.githubusercontent.com/solana-labs/wallet-adapter/master/packages/wallets/icons/phantom.svg" alt="Phantom" onerror="this.style.display='none'">
+            Phantom
+          </button>
+          <button class="wallet-btn" onclick="connectWallet('solflare')">
+            <img src="https://raw.githubusercontent.com/solana-labs/wallet-adapter/master/packages/wallets/icons/solflare.svg" alt="Solflare" onerror="this.style.display='none'">
+            Solflare
+          </button>
+          <button class="wallet-btn" onclick="connectWallet('backpack')">
+            <img src="https://raw.githubusercontent.com/solana-labs/wallet-adapter/master/packages/wallets/icons/backpack.svg" alt="Backpack" onerror="this.style.display='none'">
+            Backpack
+          </button>
+          <button class="wallet-btn" onclick="connectWallet('trust')">
+            <img src="https://raw.githubusercontent.com/solana-labs/wallet-adapter/master/packages/wallets/icons/trust.svg" alt="Trust" onerror="this.style.display='none'">
+            Trust
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 2: Verify button (shown after connect) -->
+      <div id="step-verify" style="width:100%; display:none; flex-direction:column; gap:10px;">
+        <button class="btn btn-primary" id="verify-btn" onclick="verifyHolding()">
+          Verify HHT Balance
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Not enough HHT -->
+    <div id="buy-section" style="display:none; margin-top:16px;">
+      <div class="buy-bar">
+        <p>You need <strong>1,000,000 HHT</strong> to enter VIP Arena.</p>
+        <a class="btn-buy" href="https://raydium.io/swap/?inputMint=sol&outputMint=4KrNyA5FpFGQj4jQZh1yKzBkobq7mGVftWYVWjfwpump" target="_blank" rel="noopener">
+          🪙 Buy HHT
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIP CONTENT (shown after verification) -->
+  <div id="vip-content">
+    <div class="section-label">🎮 VIP Games</div>
+    <div class="games-grid">
+
+      <div class="game-card playable" onclick="window.location.href='hht-token-eater.html'">
+        <div class="game-icon">🟡</div>
+        <div class="game-name">Token Eater</div>
+        <p class="game-desc">Eat tokens, dodge ghosts. Classic arcade action.</p>
+        <span class="badge badge-live">Live</span>
+      </div>
+
+      <div class="game-card playable" onclick="window.location.href='hht-2048-2.html'">
+        <div class="game-icon">🔢</div>
+        <div class="game-name">2048</div>
+        <p class="game-desc">Merge tiles, climb the leaderboard. Compete for $HHT prizes.</p>
+        <span class="badge badge-live">Live</span>
+      </div>
+
+      <div class="game-card">
+        <div class="game-icon">🏎️</div>
+        <div class="game-name">HHT Racer</div>
+        <p class="game-desc">High speed crypto racing. Burn tokens, win glory.</p>
+        <span class="badge badge-soon">Coming Soon</span>
+      </div>
+
+      <div class="game-card">
+        <div class="game-icon">⚔️</div>
+        <div class="game-name">HHT Fighter</div>
+        <p class="game-desc">2-player battle arena. Only the strongest holder wins.</p>
+        <span class="badge badge-soon">Coming Soon</span>
+      </div>
+
+      <div class="game-card">
+        <div class="game-icon">🎰</div>
+        <div class="game-name">HHT Slots</div>
+        <p class="game-desc">Spin the reels. All HHT, all gains.</p>
+        <span class="badge badge-soon">Coming Soon</span>
+      </div>
+
+      <div class="game-card">
+        <div class="game-icon">🧩</div>
+        <div class="game-name">HHT Puzzle</div>
+        <p class="game-desc">Mind-bending crypto puzzles. Big brain energy only.</p>
+        <span class="badge badge-soon">Coming Soon</span>
+      </div>
+
+      <div class="game-card">
+        <div class="game-icon">🌑</div>
+        <div class="game-name">????? </div>
+        <p class="game-desc">Something big is coming. Stay tuned, holder.</p>
+        <span class="badge badge-soon">Secret</span>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <a href="hht-arena.html">HHT Arena</a> &nbsp;·&nbsp;
+  <a href="index.html">Home</a> &nbsp;·&nbsp;
+  <a href="https://t.me/HappyHouseToken" target="_blank">Telegram</a>
+</footer>
+
+<script>
+  const HHT_MINT = '4KrNyA5FpFGQj4jQZh1yKzBkobq7mGVftWYVWjfwpump';
+  const MIN_HHT = 1_000_000;
+  // Using public Solana mainnet RPC — replace with your Helius key for production
+  const HELIUS_RPC = 'https://api.mainnet-beta.solana.com';
+
+  let connectedWallet = null;
+  let connectedPubkey = null;
+
+  // ── UI helpers ──
+  function setStatus(msg, type = '') {
+    const el = document.getElementById('wallet-status');
+    el.innerHTML = msg;
+    el.className = 'visible ' + type;
+  }
+
+  function clearStatus() {
+    const el = document.getElementById('wallet-status');
+    el.className = '';
+    el.innerHTML = '';
+  }
+
+  function showStep(step) {
+    document.getElementById('step-connect').style.display = step === 'connect' ? 'flex' : 'none';
+    document.getElementById('step-verify').style.display = step === 'verify' ? 'flex' : 'none';
+  }
+
+  function showVIP() {
+    document.getElementById('gate-section').style.display = 'none';
+    document.getElementById('buy-section').style.display = 'none';
+    document.getElementById('vip-content').classList.add('visible');
+  }
+
+  function showBuySection() {
+    document.getElementById('buy-section').style.display = 'block';
+  }
+
+  function updateConnectedBar(pubkey) {
+    const bar = document.getElementById('connected-bar');
+    const addr = document.getElementById('connected-addr');
+    if (pubkey) {
+      bar.classList.add('visible');
+      addr.textContent = pubkey.slice(0, 4) + '...' + pubkey.slice(-4);
+    } else {
+      bar.classList.remove('visible');
+    }
+  }
+
+  // ── Wallet connect ──
+  async function connectWallet(type) {
+    try {
+      let provider = null;
+
+      if (type === 'phantom') {
+        provider = window.phantom?.solana || window.solana;
+        if (!provider?.isPhantom) {
+          window.open('https://phantom.app/', '_blank');
+          return;
+        }
+      } else if (type === 'solflare') {
+        provider = window.solflare;
+        if (!provider?.isSolflare) {
+          window.open('https://solflare.com/', '_blank');
+          return;
+        }
+      } else if (type === 'backpack') {
+        provider = window.backpack || window.xnft;
+        if (!provider) {
+          window.open('https://backpack.app/', '_blank');
+          return;
+        }
+      } else if (type === 'trust') {
+        provider = window.trustwallet?.solana || window.solana;
+        if (!provider) {
+          window.open('https://trustwallet.com/', '_blank');
+          return;
+        }
+      }
+
+      if (!provider) {
+        setStatus('❌ Wallet not found. Please install it first.', 'error');
+        return;
+      }
+
+      setStatus('<span class="spinner"></span> Connecting...', 'checking');
+
+      const resp = await provider.connect();
+      const pubkey = resp.publicKey.toString();
+
+      connectedWallet = provider;
+      connectedPubkey = pubkey;
+
+      updateConnectedBar(pubkey);
+      setStatus('✅ Wallet connected. Verify your HHT balance.', 'success');
+      showStep('verify');
+
+    } catch (err) {
+      setStatus('❌ Connection cancelled.', 'error');
+      console.error(err);
+    }
+  }
+
+  // ── Verify HHT balance ──
+  async function verifyHolding() {
+    if (!connectedPubkey) return;
+
+    const btn = document.getElementById('verify-btn');
+    btn.disabled = true;
+    setStatus('<span class="spinner"></span> Checking HHT balance...', 'checking');
+
+    try {
+      const balance = await getHHTBalance(connectedPubkey);
+
+      if (balance >= MIN_HHT) {
+        setStatus(`✅ ${balance.toLocaleString()} HHT verified. Welcome, holder!`, 'success');
+        setTimeout(showVIP, 1200);
+      } else {
+        setStatus(`❌ You hold ${balance.toLocaleString()} HHT. Need 1,000,000 to enter.`, 'error');
+        showBuySection();
+        btn.disabled = false;
+      }
+    } catch (err) {
+      setStatus('❌ Could not check balance. Try again.', 'error');
+      console.error(err);
+      btn.disabled = false;
+    }
+  }
+
+  // ── Get HHT token balance via Solana RPC ──
+  async function getHHTBalance(pubkey) {
+    const body = {
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'getTokenAccountsByOwner',
+      params: [
+        pubkey,
+        { mint: HHT_MINT },
+        { encoding: 'jsonParsed' }
+      ]
+    };
+
+    const res = await fetch(HELIUS_RPC, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    const data = await res.json();
+    const accounts = data?.result?.value || [];
+
+    if (accounts.length === 0) return 0;
+
+    const amount = accounts[0]?.account?.data?.parsed?.info?.tokenAmount?.uiAmount || 0;
+    return amount;
+  }
+
+  // ── Disconnect ──
+  document.getElementById('disconnect-btn').addEventListener('click', async () => {
+    try {
+      if (connectedWallet?.disconnect) await connectedWallet.disconnect();
+    } catch {}
+    connectedWallet = null;
+    connectedPubkey = null;
+    updateConnectedBar(null);
+    clearStatus();
+    showStep('connect');
+    document.getElementById('gate-section').style.display = '';
+    document.getElementById('buy-section').style.display = 'none';
+    document.getElementById('vip-content').classList.remove('visible');
+  });
+</script>
+</body>
+</html>
