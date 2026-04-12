@@ -432,6 +432,38 @@
     .game-card:hover::before { opacity: 1; }
 
     .game-card.playable { cursor: pointer; }
+    .game-thumb {
+      width: 100%;
+      height: 130px;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 4px;
+      border: 1px solid rgba(255,215,0,0.15);
+      background: #050608;
+    }
+    .game-thumb svg {
+      width: 100%; height: 100%; display: block;
+    }
+
+    .game-thumb {
+      width: 100%;
+      height: 130px;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 4px;
+      border: 1px solid rgba(255,215,0,0.15);
+      position: relative;
+      background: #050608;
+    }
+    .game-thumb svg, .game-thumb canvas {
+      width: 100%; height: 100%;
+    }
+    .game-thumb img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
 
     .game-icon {
       font-size: 42px;
@@ -722,6 +754,62 @@
         <div class="game-name">Token Eater</div>
         <p class="game-desc">Eat tokens, dodge ghosts. Classic arcade action.</p>
         <p class="game-desc" style="color:#ff4444;font-size:11px;margin-top:-4px;">🖥️ Play on PC — not mobile friendly</p>
+        <span class="badge badge-live">Live</span>
+      </div>
+
+
+      <div class="game-card playable" onclick="window.location.href='hht-worm.html'">
+        <div class="game-thumb"><svg viewBox="0 0 300 130" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="wbg" cx="50%" cy="50%" r="70%"><stop offset="0%" stop-color="#1e3060"/><stop offset="100%" stop-color="#0e1830"/></radialGradient>
+    <radialGradient id="wseg" cx="35%" cy="30%" r="65%"><stop offset="0%" stop-color="#FF9944"/><stop offset="55%" stop-color="#FF5500"/><stop offset="100%" stop-color="#BB2200"/></radialGradient>
+  </defs>
+  <rect width="300" height="130" fill="url(#wbg)"/>
+  <ellipse cx="40" cy="30" rx="35" ry="22" fill="rgba(0,0,0,0.18)"/>
+  <ellipse cx="220" cy="90" rx="50" ry="30" fill="rgba(0,0,0,0.18)"/>
+  <ellipse cx="270" cy="30" rx="30" ry="18" fill="rgba(0,0,0,0.18)"/>
+  <rect x="2" y="2" width="296" height="126" fill="none" stroke="rgba(255,80,80,0.35)" stroke-width="2"/>
+  <circle cx="220" cy="42" r="14" fill="rgba(255,215,0,0.15)"/>
+  <circle cx="220" cy="42" r="9" fill="#FFD700"/>
+  <text x="220" y="46" text-anchor="middle" font-size="9" font-weight="bold" fill="rgba(100,65,0,0.9)">$</text>
+  <circle cx="75" cy="98" r="14" fill="rgba(255,215,0,0.15)"/>
+  <circle cx="75" cy="98" r="9" fill="#FFD700"/>
+  <text x="75" y="102" text-anchor="middle" font-size="9" font-weight="bold" fill="rgba(100,65,0,0.9)">$</text>
+  <circle cx="255" cy="80" r="10" fill="rgba(255,215,0,0.12)"/>
+  <circle cx="255" cy="80" r="7" fill="#FFD700"/>
+  <circle cx="135" cy="105" r="7" fill="#CC1133"/>
+  <circle cx="147" cy="107" r="7" fill="#EE2244"/>
+  <circle cx="48" cy="48" r="9" fill="#FF88CC"/>
+  <circle cx="48" cy="48" r="3.5" fill="#0e1830"/>
+  <circle cx="85" cy="72" r="11" fill="#CC3300" opacity="0.7"/>
+  <circle cx="97" cy="67" r="11" fill="#DD4400" opacity="0.8"/>
+  <circle cx="109" cy="63" r="12" fill="#EE5500" opacity="0.9"/>
+  <circle cx="122" cy="60" r="12" fill="#FF5500"/>
+  <circle cx="135" cy="58" r="13" fill="#FF6600"/>
+  <circle cx="149" cy="57" r="13" fill="#FF7700"/>
+  <circle cx="163" cy="57" r="15" fill="url(#wseg)"/>
+  <circle cx="157" cy="51" r="6" fill="rgba(255,255,255,0.22)"/>
+  <circle cx="169" cy="50" r="5" fill="white"/>
+  <circle cx="159" cy="50" r="5" fill="white"/>
+  <circle cx="170" cy="51" r="2.8" fill="#111"/>
+  <circle cx="160" cy="51" r="2.8" fill="#111"/>
+  <circle cx="169" cy="49" r="1.2" fill="white"/>
+  <circle cx="159" cy="49" r="1.2" fill="white"/>
+  <rect x="8" y="8" width="65" height="28" rx="7" fill="rgba(0,0,0,0.6)"/>
+  <text x="40" y="19" text-anchor="middle" font-size="5.5" fill="rgba(255,215,0,0.85)" font-family="monospace" letter-spacing="1">SCORE</text>
+  <text x="40" y="30" text-anchor="middle" font-size="11" fill="white" font-family="monospace" font-weight="bold">420</text>
+  <rect x="95" y="8" width="110" height="28" rx="7" fill="rgba(0,0,0,0.6)"/>
+  <text x="125" y="19" text-anchor="middle" font-size="5.5" fill="rgba(255,215,0,0.85)" font-family="monospace">$HHT</text>
+  <text x="125" y="30" text-anchor="middle" font-size="11" fill="#FFD700" font-family="monospace" font-weight="bold">12</text>
+  <text x="168" y="19" text-anchor="middle" font-size="5.5" fill="rgba(0,255,170,0.85)" font-family="monospace">SPEED</text>
+  <text x="168" y="30" text-anchor="middle" font-size="10" fill="#00FFAA" font-family="monospace" font-weight="bold">1.5x</text>
+  <circle cx="279" cy="22" r="17" fill="rgba(0,0,0,0.6)" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+  <circle cx="270" cy="18" r="2" fill="#FFD700"/>
+  <circle cx="284" cy="28" r="2" fill="#FF3355"/>
+  <circle cx="276" cy="30" r="3" fill="#FF6600"/>
+</svg></div>
+        <div class="game-name">HHT WORM</div>
+        <p class="game-desc">Collect $HHT tokens · Grow your worm · Survive!</p>
         <span class="badge badge-live">Live</span>
       </div>
 
