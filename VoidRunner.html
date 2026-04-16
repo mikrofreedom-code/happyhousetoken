@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>VOID RUNNER</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #000; display: flex; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
+    canvas { display: block; touch-action: none; }
+  </style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+
+// ─────────────────────────────────────────────
+//  SETUP
+// ─────────────────────────────────────────────
+
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
+
+const SIZE = Math.min(window.innerWidth, window.innerHeight * 0.65, 420);
+canvas.width  = SIZE;
+canvas.height = SIZE * 1.6;
+const W = canvas.width;
+const H = canvas.height;
+
+// Game modes
+const MODE_MENU    = 0;
+const MODE_PLAYING = 1;
+const MODE_DEAD    = 2;
+
+// ─────────────────────────────────────────────
+//  CONSTANTS
+// ─────────────────────────────────────────────
+
+const GRAVITY      = 0.24;
+const JUMP_FORCE   = -6.2;
+const SPEED_START  = 1.2;
+const SPEED_MAX    = 3.2;
+const SPEED_RAMP   = 0.0004;   // per tick
+const PIPE_WIDTH   = 40;
+const PIPE_GAP     = H * 0.52;
+const GRACE_TICKS  = 120;      // ~2s before collisions activate
+const DEAD_DELAY   = 2500;     // ms before returning to menu
+
+const NEBULAE = [
+  { x: W * 0.15, y: H * 0.25, r: W * 0.55, col: [0,   100, 255], op: 0.07 },
+  { x: W * 0.85, y: H * 0.65, r: W * 0.45, col: [120,   0, 220], op: 0.06 },
+  { x: W * 0.50, y: H * 0.10, r: W * 0.35, col: [0,   200, 150], op: 0.05 },
+];
+
+// ─────────────────────────────────────────────
+//  STATE
+// ─────────────────────────────────────────────
+
+let mode      = MODE_MENU;
+let tick      = 0;
+let best      = parseInt(localStorage.getItem('vr') || '0');
+let btnRect   = null; // LAUNCH button hit area
+
+// Game objects
+let ship, pipes, particles, score, speed, pipeTimer, shake;
+
+// Star layers (3 parallax speeds)
+const stars = [
+  Array.from({ length: 60 }, () => makeStar(0.2, 0.8,  0.2, 0.5)),
+  Array.from({ length: 40 }, () => makeStar(0.5, 1.2,  0.4, 0.6)),
+  Array.from({ length: 20 }, () => makeStar(1.0, 1.8,  0.7, 1.0)),
+];
+
+function makeStar(spd, maxR, minOp, maxOp) {
+  return {
+    x:   Math.random() * W,
+    y:   Math.random() * H,
+    r:   Math.random() * maxR + 0.2,
+    spd: spd,
+    op:  Math.random() * (maxOp - minOp) + minOp,
+  };
+}
+
+// ─────────────────────────────────────────────
+//  INIT / RESET
+// ─────────────────────────────────────────────
+
+function reset() {
+  ship      = { x: W * 0.25, y: H * 0.35, vy: 0, trail: [] };
+  pipes     = [];
+  particles = [];
+  score     = 0;
+  speed     = SPEED_START;
+  pipeTimer = -80; // delay before first pipe
+  shake     = 0;
+  tick      = 0;
+}
+
+// ─────────────────────────────────────────────
+//  INPUT
+// ─────────────────────────────────────────────
+
+canvas.addEventListener('pointerdown', function(e) {
+  e.preventDefault();
+
+  // Convert screen coords to canvas coords
+  const rect   = canvas.getBoundingClientRect();
+  const tapX   = (e.clientX - rect.left) * (W / rect.width);
+  const tapY   = (e.clientY - rect.top)  * (H / rect.height);
+
+  if (mode === MODE_MENU) {
+    // Only start if tap is inside the LAUNCH button
+    if (btnRect && tapX >= btnRect.x && tapX <= btnRect.x + btnRect.w
+                && tapY >= btnRect.y && tapY <= btnRect.y + btnRect.h) {
+      startGame();
+    }
+  } else if (mode === MODE_PLAYING) {
+    jump();
+  }
+}, { passive: false });
+
+window.addEventListener('keydown', function(e) {
+  if (e.code !== 'Space') return;
+  e.preventDefault();
+  if (mode === MODE_MENU)    startGame();
+  else if (mode === MODE_PLAYING) jump();
+});
+
+function startGame() {
+  reset();
+  mode = MODE_PLAYING;
+}
+
+function jump() {
+  ship.vy = JUMP_FORCE;
+  spawnThrustBurst();
+}
+
+// ─────────────────────────────────────────────
+//  PARTICLES
+// ─────────────────────────────────────────────
+
+function spawnThrustBurst() {
+  for (let i = 0; i < 12; i++) {
+    const angle = Math.PI + (Math.random() - 0.5) * 1.0;
+    const spd   = Math.random() * 3 + 1;
+    particles.push({
+      x: ship.x - 14, y: ship.y + (Math.random() - 0.5) * 6,
+      vx: Math.cos(angle) * spd, vy: Math.sin(angle) * spd,
+      life: 1, decay: 0.06 + Math.random() * 0.04,
+      size: Math.random() * 4 + 2, type: 'thrust',
+    });
+  }
+}
+
+function spawnExhaust() {
+  particles.push({
+    x: ship.x - 14, y: ship.y + (Math.random() - 0.5) * 4,
+    vx: -(Math.random() * 1.5 + 0.5), vy: (Math.random() - 0.5) * 0.8,
+    life: 0.7, decay: 0.05 + Math.random() * 0.03,
+    size: Math.random() * 3 + 1, type: 'exhaust',
+  });
+}
+
+function spawnExplosion(x, y) {
+  for (let i = 0; i < 32; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const spd   = Math.random() * 5 + 1;
+    particles.push({
+      x, y,
+      vx: Math.cos(angle) * spd, vy: Math.sin(angle) * spd,
+      life: 1, decay: 0.025 + Math.random() * 0.02,
+      size: Math.random() * 5 + 2, type: 'explode',
+    });
+  }
+}
+
+function spawnScorePop(x, y) {
+  for (let i = 0; i < 8; i++) {
+    const angle = -Math.PI / 2 + (Math.random() - 0.5) * 1.2;
+    particles.push({
+      x, y,
+      vx: Math.cos(angle) * 2, vy: Math.sin(angle) * 3,
+      life: 1, decay: 0.03, size: 3, type: 'score',
+    });
+  }
+}
+
+// ─────────────────────────────────────────────
+//  UPDATE
+// ─────────────────────────────────────────────
+
+function update() {
+  tick++;
+
+  // Ship physics
+  ship.vy += GRAVITY;
+  ship.y  += ship.vy;
+
+  // Trail
+  ship.trail.push({ x: ship.x, y: ship.y });
+  if (ship.trail.length > 18) ship.trail.shift();
+
+  // Idle exhaust every 2 ticks
+  if (tick % 2 === 0) spawnExhaust();
+
+  // Speed ramp
+  speed = Math.min(SPEED_MAX, SPEED_START + tick * SPEED_RAMP);
+
+  // Pipes
+  pipeTimer++;
+  const pipeInterval = Math.max(90, 140 - score * 2);
+  if (pipeTimer >= pipeInterval) { spawnPipe(); pipeTimer = 0; }
+
+  for (const p of pipes) p.x -= speed;
+  pipes = pipes.filter(p => p.x > -60);
+
+  // Score — count when pipe passes ship
+  for (const p of pipes) {
+    if (!p.passed && p.x + PIPE_WIDTH < ship.x) {
+      p.passed = true;
+      score++;
+      spawnScorePop(ship.x, ship.y - 20);
+    }
+  }
+
+  // Parallax stars
+  for (const layer of stars) {
+    for (const s of layer) {
+      s.x -= s.spd * (speed / 3);
+      if (s.x < 0) { s.x = W + 1; s.y = Math.random() * H; }
+    }
+  }
+
+  // Particles
+  for (const p of particles) {
+    p.x += p.vx;
+    p.y += p.vy;
+    if (p.type === 'explode') p.vy += 0.15;
+    p.life -= p.decay;
+  }
+  particles = particles.filter(p => p.life > 0).slice(-200);
+
+  // Screen shake countdown
+  if (shake > 0) shake--;
+
+  // Collision (grace period for first GRACE_TICKS ticks)
+  if (tick < GRACE_TICKS) return;
+
+  const sr = 11;
+  if (ship.y - sr < 0 || ship.y + sr > H) { die(); return; }
+  for (const p of pipes) {
+    if (ship.x + sr > p.x && ship.x - sr < p.x + PIPE_WIDTH) {
+      if (ship.y - sr < p.top || ship.y + sr > p.top + p.gap) { die(); return; }
+    }
+  }
+}
+
+function spawnPipe() {
+  const top = H * 0.08 + Math.random() * (H * 0.38);
+  const col = Math.random() > 0.5 ? [0, 255, 200] : [0, 180, 255];
+  pipes.push({ x: W + PIPE_WIDTH, top, gap: PIPE_GAP, passed: false, col });
+}
+
+function die() {
+  if (score > best) { best = score; localStorage.setItem('vr', best); }
+  spawnExplosion(ship.x, ship.y);
+  shake = 18;
+  mode  = MODE_DEAD;
+  setTimeout(() => { mode = MODE_MENU; }, DEAD_DELAY);
+}
+
+// ─────────────────────────────────────────────
+//  DRAW HELPERS
+// ─────────────────────────────────────────────
+
+function drawRoundRect(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y); ctx.arcTo(x + w, y,     x + w, y + r,     r);
+  ctx.lineTo(x + w, y + h - r); ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+  ctx.lineTo(x + r, y + h); ctx.arcTo(x,     y + h, x,     y + h - r, r);
+  ctx.lineTo(x, y + r); ctx.arcTo(x,     y,     x + r,   y,         r);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+}
+
+function drawCornerBrackets(margin, size, color) {
+  ctx.strokeStyle = color;
+  ctx.lineWidth   = 2;
+  const m = margin;
+  [
+    [m,     m,     1,  1],
+    [W - m, m,    -1,  1],
+    [m,     H - m, 1, -1],
+    [W - m, H - m,-1, -1],
+  ].forEach(([cx, cy, sx, sy]) => {
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + sx * size, cy); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx, cy + sy * size); ctx.stroke();
+  });
+}
+
+// ─────────────────────────────────────────────
+//  DRAW FUNCTIONS
+// ─────────────────────────────────────────────
+
+function drawBackground() {
+  // Sky gradient
+  const grad = ctx.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0,   '#000a1a');
+  grad.addColorStop(0.5, '#000510');
+  grad.addColorStop(1,   '#000c18');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+
+  // Nebulae
+  for (const n of NEBULAE) {
+    const g = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.r);
+    g.addColorStop(0, `rgba(${n.col},${n.op})`);
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Stars
+  for (let li = 0; li < stars.length; li++) {
+    for (const s of stars[li]) {
+      const twinkle = 0.6 + 0.4 * Math.sin(tick * 0.05 + s.x);
+      ctx.globalAlpha = s.op * twinkle;
+      ctx.fillStyle   = li === 2 ? '#aaddff' : '#ffffff';
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  ctx.globalAlpha = 1;
+
+  // Scanlines
+  ctx.fillStyle = 'rgba(0,0,0,0.04)';
+  for (let y = 0; y < H; y += 4) ctx.fillRect(0, y, W, 2);
+}
+
+function drawPipes() {
+  for (const p of pipes) {
+    const [r, g, b] = p.col;
+    const bot = p.top + p.gap;
+
+    // Fill with subtle gradient
+    const grad = ctx.createLinearGradient(p.x, 0, p.x + PIPE_WIDTH, 0);
+    grad.addColorStop(0,   'rgba(0,30,25,0.98)');
+    grad.addColorStop(0.4, `rgba(${r},${g},${b},0.25)`);
+    grad.addColorStop(1,   'rgba(0,20,18,0.98)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(p.x, 0,   PIPE_WIDTH, p.top);
+    ctx.fillRect(p.x, bot, PIPE_WIDTH, H - bot);
+
+    // Neon border
+    ctx.shadowBlur  = 12;
+    ctx.shadowColor = `rgb(${r},${g},${b})`;
+    ctx.strokeStyle = `rgb(${r},${g},${b})`;
+    ctx.lineWidth   = 1.5;
+    ctx.strokeRect(p.x + 0.75, 0,       PIPE_WIDTH - 1.5, p.top);
+    ctx.strokeRect(p.x + 0.75, bot + 1, PIPE_WIDTH - 1.5, H - bot);
+
+    // Gap edge glow lines
+    ctx.shadowBlur  = 20;
+    ctx.shadowColor = `rgba(${r},${g},${b},0.6)`;
+    ctx.strokeStyle = `rgba(${r},${g},${b},0.5)`;
+    ctx.lineWidth   = 1;
+    ctx.beginPath(); ctx.moveTo(p.x, p.top); ctx.lineTo(p.x + PIPE_WIDTH, p.top); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(p.x, bot);   ctx.lineTo(p.x + PIPE_WIDTH, bot);   ctx.stroke();
+    ctx.shadowBlur  = 0;
+
+    // Inner detail lines
+    ctx.strokeStyle = `rgba(${r},${g},${b},0.1)`;
+    ctx.lineWidth   = 1;
+    for (let yy = 6; yy < p.top - 4; yy += 10) {
+      ctx.beginPath(); ctx.moveTo(p.x + 4, yy); ctx.lineTo(p.x + 36, yy); ctx.stroke();
+    }
+    for (let yy = bot + 6; yy < H - 4; yy += 10) {
+      ctx.beginPath(); ctx.moveTo(p.x + 4, yy); ctx.lineTo(p.x + 36, yy); ctx.stroke();
+    }
+  }
+}
+
+function drawParticles() {
+  for (const p of particles) {
+    ctx.globalAlpha = Math.max(0, p.life);
+
+    if (p.type === 'thrust' || p.type === 'exhaust') {
+      ctx.fillStyle   = p.life > 0.5 ? `rgba(0,200,255,${p.life})` : `rgba(255,140,0,${p.life})`;
+      ctx.shadowBlur  = 8;
+      ctx.shadowColor = '#00c8ff';
+    } else if (p.type === 'explode') {
+      ctx.fillStyle   = p.life > 0.5 ? '#ff6030' : '#ffcc00';
+      ctx.shadowBlur  = 12;
+      ctx.shadowColor = '#ff4000';
+    } else if (p.type === 'score') {
+      ctx.fillStyle   = '#00ffc8';
+      ctx.shadowBlur  = 8;
+      ctx.shadowColor = '#00ffc8';
+    }
+
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+  }
+  ctx.globalAlpha = 1;
+}
+
+function drawShip() {
+  // Glow trail
+  for (let i = 0; i < ship.trail.length; i++) {
+    const t = ship.trail[i];
+    ctx.globalAlpha = (i / ship.trail.length) * 0.3;
+    ctx.fillStyle   = '#00ffc8';
+    ctx.beginPath();
+    ctx.arc(t.x, t.y, 3 * (i / ship.trail.length), 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+
+  // Ship
+  ctx.save();
+  ctx.translate(ship.x, ship.y);
+  ctx.rotate(Math.atan2(ship.vy, 20) * 0.45);
+
+  ctx.shadowBlur  = 24;
+  ctx.shadowColor = '#00ffc8';
+  ctx.fillStyle   = '#00ffc8';
+  ctx.beginPath();
+  ctx.moveTo(18, 0); ctx.lineTo(-12, -11); ctx.lineTo(-8, 0); ctx.lineTo(-12, 11);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.shadowBlur = 0;
+  ctx.fillStyle  = 'rgba(0,180,255,0.7)';
+  ctx.beginPath(); ctx.moveTo(-8, 0); ctx.lineTo(-12, -11); ctx.lineTo(-17, -5); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(-8, 0); ctx.lineTo(-12,  11); ctx.lineTo(-17,  5); ctx.closePath(); ctx.fill();
+
+  ctx.fillStyle   = '#fff';
+  ctx.shadowBlur  = 8;
+  ctx.shadowColor = '#fff';
+  ctx.beginPath(); ctx.arc(5, 0, 3.5, 0, Math.PI * 2); ctx.fill();
+  ctx.shadowBlur  = 0;
+
+  ctx.restore();
+}
+
+function drawScore() {
+  ctx.shadowBlur  = 16;
+  ctx.shadowColor = '#00ffc8';
+  ctx.fillStyle   = '#00ffc8';
+  ctx.font        = 'bold ' + Math.round(W * 0.08) + 'px monospace';
+  ctx.textAlign   = 'center';
+  ctx.fillText(score, W / 2, Math.round(H * 0.07));
+  ctx.shadowBlur  = 0;
+  ctx.textAlign   = 'left';
+}
+
+function drawMenu() {
+  ctx.textAlign = 'center';
+
+  // Animated ship preview
+  const bobY  = H * 0.42 + Math.sin(tick * 0.05) * 8;
+  ctx.save();
+  ctx.translate(W / 2, bobY);
+  ctx.shadowBlur  = 28;
+  ctx.shadowColor = '#00ffc8';
+  ctx.fillStyle   = '#00ffc8';
+  ctx.beginPath(); ctx.moveTo(20,0); ctx.lineTo(-14,-13); ctx.lineTo(-9,0); ctx.lineTo(-14,13); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = 'rgba(0,180,255,0.7)';
+  ctx.beginPath(); ctx.moveTo(-9,0); ctx.lineTo(-14,-13); ctx.lineTo(-20,-6); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(-9,0); ctx.lineTo(-14, 13); ctx.lineTo(-20,  6); ctx.closePath(); ctx.fill();
+  ctx.fillStyle   = '#fff';
+  ctx.shadowBlur  = 8;
+  ctx.shadowColor = '#fff';
+  ctx.beginPath(); ctx.arc(6, 0, 4, 0, Math.PI * 2); ctx.fill();
+  ctx.shadowBlur  = 0;
+  ctx.restore();
+
+  // Title with pulse glow
+  const fs    = Math.round(W * 0.13);
+  const pulse = 0.85 + 0.15 * Math.sin(tick * 0.04);
+  ctx.shadowBlur  = 28 * pulse;
+  ctx.shadowColor = '#00ffc8';
+  ctx.fillStyle   = '#fff';
+  ctx.font        = 'bold ' + fs + 'px monospace';
+  ctx.fillText('VOID',   W / 2, H * 0.2);
+  ctx.fillText('RUNNER', W / 2, H * 0.2 + fs * 1.15);
+  ctx.shadowBlur  = 0;
+
+  ctx.fillStyle = 'rgba(0,255,200,0.35)';
+  ctx.font      = Math.round(W * 0.032) + 'px monospace';
+  ctx.fillText('ESCAPE THE INFINITE VOID', W / 2, H * 0.2 + fs * 2.1);
+
+  // LAUNCH button
+  const bw = W * 0.55, bh = H * 0.075;
+  const bx = W / 2 - bw / 2, by = H * 0.63;
+  const bg = ctx.createLinearGradient(bx, by, bx + bw, by + bh);
+  bg.addColorStop(0, '#00ffc8');
+  bg.addColorStop(1, '#00c8ff');
+  ctx.fillStyle   = bg;
+  ctx.shadowBlur  = 20;
+  ctx.shadowColor = '#00ffc8';
+  ctx.strokeStyle = 'transparent';
+  ctx.lineWidth   = 0;
+  ctx.beginPath(); ctx.roundRect(bx, by, bw, bh, bh / 2); ctx.fill();
+  ctx.shadowBlur  = 0;
+  ctx.fillStyle   = '#000';
+  ctx.font        = 'bold ' + Math.round(W * 0.05) + 'px monospace';
+  ctx.fillText('▶  LAUNCH', W / 2, by + bh * 0.67);
+  btnRect = { x: bx, y: by, w: bw, h: bh };
+
+  // Best score
+  if (best > 0) {
+    ctx.fillStyle = 'rgba(0,255,200,0.5)';
+    ctx.font      = Math.round(W * 0.038) + 'px monospace';
+    ctx.fillText('BEST: ' + best, W / 2, H * 0.76);
+  }
+
+  drawCornerBrackets(14, 20, 'rgba(0,255,200,0.3)');
+  ctx.textAlign = 'left';
+}
+
+function drawDead() {
+  ctx.fillStyle = 'rgba(0,0,0,0.65)';
+  ctx.fillRect(0, 0, W, H);
+  ctx.textAlign = 'center';
+
+  // Glitch effect on title
+  const glitch    = Math.random() < 0.08 ? (Math.random() - 0.5) * 6 : 0;
+  const titleSize = Math.round(W * 0.11);
+  ctx.shadowBlur  = 24;
+  ctx.shadowColor = '#ff3060';
+  ctx.fillStyle   = '#ff3060';
+  ctx.font        = 'bold ' + titleSize + 'px monospace';
+  ctx.fillText('SYSTEM',  W / 2 + glitch, H * 0.33);
+  ctx.fillText('FAILURE', W / 2 - glitch, H * 0.33 + titleSize * 1.1);
+  ctx.shadowBlur  = 0;
+
+  // Score panel
+  const px = W * 0.1, py = H * 0.49, pw = W * 0.8, ph = H * 0.22;
+  ctx.fillStyle   = 'rgba(0,255,200,0.04)';
+  ctx.strokeStyle = 'rgba(0,255,200,0.2)';
+  ctx.lineWidth   = 1;
+  drawRoundRect(px, py, pw, ph, 8);
+
+  ctx.fillStyle   = 'rgba(0,255,200,0.4)';
+  ctx.font        = Math.round(W * 0.032) + 'px monospace';
+  ctx.fillText('SCORE', W / 2, py + ph * 0.28);
+
+  ctx.shadowBlur  = 14;
+  ctx.shadowColor = '#00ffc8';
+  ctx.fillStyle   = '#00ffc8';
+  ctx.font        = 'bold ' + Math.round(W * 0.1) + 'px monospace';
+  ctx.fillText(score, W / 2, py + ph * 0.62);
+  ctx.shadowBlur  = 0;
+
+  ctx.fillStyle = 'rgba(0,255,200,0.35)';
+  ctx.font      = Math.round(W * 0.032) + 'px monospace';
+  ctx.fillText('BEST: ' + best, W / 2, py + ph * 0.9);
+
+  ctx.textAlign = 'left';
+}
+
+// ─────────────────────────────────────────────
+//  MAIN LOOP
+// ─────────────────────────────────────────────
+
+function frame() {
+  requestAnimationFrame(frame);
+
+  // Screen shake
+  const shaking = shake > 0;
+  if (shaking) {
+    ctx.save();
+    ctx.translate((Math.random() - 0.5) * 8, (Math.random() - 0.5) * 8);
+    shake--;
+  }
+
+  drawBackground();
+
+  if (mode === MODE_MENU) {
+    // Slow idle star scroll
+    for (const layer of stars)
+      for (const s of layer) { s.x -= s.spd * 0.27; if (s.x < 0) { s.x = W + 1; s.y = Math.random() * H; } }
+    drawMenu();
+
+  } else if (mode === MODE_PLAYING) {
+    update();
+    drawPipes();
+    drawParticles();
+    drawShip();
+    drawScore();
+
+  } else { // MODE_DEAD
+    // Slow star drift while dead
+    for (const s of stars[0]) { s.x -= s.spd * 0.3; if (s.x < 0) { s.x = W + 1; s.y = Math.random() * H; } }
+    drawPipes();
+    drawParticles();
+    drawShip();
+    drawScore();
+    drawDead();
+  }
+
+  if (shaking) ctx.restore();
+}
+
+frame();
+
+</script>
+</body>
+</html>
