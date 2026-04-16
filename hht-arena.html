@@ -594,25 +594,14 @@ footer { text-align:center;padding:22px 24px;border-top:1px solid rgba(255,120,0
 
 <!-- ══ ZONE 2: GAMES ══ -->
 <section class="zone-games">
-  <div class="games-grid" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); max-width: 600px;">
+  <div class="games-grid" style="grid-template-columns: 1fr; max-width: 320px;">
 
     <a href="hht-tetris.html" class="game-card gc-cyan" style="text-decoration:none;">
       <span class="game-emoji">🧩</span>
       <span class="game-name">HHT TETRIS</span>
       <span class="beta-badge">BETA</span>
-      <div class="game-countdown">
-        <span>SEASON ENDS</span>
-        <div id="arenaCountdown">--d --h --m --s</div>
-      </div>
-      <div class="game-prize">🏆 1,000,000 $HHT</div>
       <span class="game-tag">PLAY NOW ▶</span>
     </a>
-
-    <div class="game-card gc-pink">
-      <span class="game-emoji">⭐</span>
-      <span class="game-name" style="color:var(--pink);text-shadow:0 0 8px var(--pink);">MORE GAMES</span>
-      <span class="game-tag">COMING SOON</span>
-    </div>
 
   </div>
 </section>
@@ -714,32 +703,6 @@ footer { text-align:center;padding:22px 24px;border-top:1px solid rgba(255,120,0
 <footer>$HHT &nbsp;•&nbsp; SOLANA &nbsp;•&nbsp; 2026 &nbsp;•&nbsp; THE HAPPYHOUSE ARCADE</footer>
 
 
-<script>
-(function() {
-  var endDate = new Date('2026-04-10T20:00:00Z'); // Piatok 10.4.2026 22:00 SK
-  function update() {
-    var el = document.getElementById('arenaCountdown');
-    if (!el) return;
-    var diff = endDate - Date.now();
-    if (diff <= 0) {
-      el.textContent = 'ENDED';
-      el.style.color = '#ff2020';
-      return;
-    }
-    var d = Math.floor(diff / 86400000);
-    var h = Math.floor((diff % 86400000) / 3600000);
-    var m = Math.floor((diff % 3600000) / 60000);
-    var s = Math.floor((diff % 60000) / 1000);
-    var pad = function(n) { return n < 10 ? '0' + n : n; };
-    if (d > 0) {
-      el.textContent = d + 'd ' + pad(h) + 'h ' + pad(m) + 'm';
-    } else {
-      el.textContent = pad(h) + 'h ' + pad(m) + 'm ' + pad(s) + 's';
-    }
-  }
-  update();
-  setInterval(update, 1000);
-})();
-</script>
+
 </body>
 </html>
