@@ -1012,7 +1012,7 @@
   var SEASONS_TABLE = 'hht_2048_seasons';
 
   // Season config
-  var SEASON_END_DATE    = new Date('2026-04-10T20:00:00Z'); // Piatok 10.4.2026 22:00 SK
+  var SEASON_END_DATE    = new Date('2026-05-31T20:00:00Z'); // Sobota 31.5.2026 22:00 SK
   var LOCKDOWN_MS        = 5 * 60 * 1000;            // 5 minutes
 
   // ══════════════════════════════════════════════
@@ -1052,8 +1052,21 @@
       var endsAt = new Date(s.ends_at).getTime();
 
       if (now > endsAt + LOCKDOWN_MS) {
-        // Season has ended and lockdown passed — create new season
-        await createNewSeason(s.number + 1);
+        // Season ended — only create new season if SEASON_END_DATE is in the future
+        // This prevents every visitor from triggering a reset
+        if (SEASON_END_DATE.getTime() > now) {
+          await createNewSeason(s.number + 1);
+        } else {
+          // SEASON_END_DATE not updated yet — just load current season as-is
+          currentSeason = {
+            id: s.id,
+            number: s.number,
+            startedAt: new Date(s.started_at).getTime(),
+            endsAt: endsAt
+          };
+          startCountdown();
+          loadLeaderboard();
+        }
       } else {
         currentSeason = {
           id: s.id,
@@ -1085,8 +1098,8 @@
           startedAt: now.getTime(),
           endsAt: endsAt.getTime()
         };
-        // Reset all scores for new season
-        await sbFetch('PATCH', TABLE_NAME + '?best_score=gte.0', { best_score: 0, season_id: currentSeason.id });
+        // Reset all scores for new season (keep player records, only wipe scores)
+        await sbFetch('PATCH', TABLE_NAME + '?best_score=gte.0', { best_score: 0 });
         startCountdown();
         loadLeaderboard();
       }
