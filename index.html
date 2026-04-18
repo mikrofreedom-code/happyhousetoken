@@ -715,6 +715,114 @@ footer {
   .token-grid { grid-template-columns:1fr; }
 }
 
+/* ===== HERO NEWS STRIP ===== */
+.hero-news {
+  margin-top: 48px;
+  width: 100%;
+  max-width: 860px;
+}
+.hero-news-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.hero-news-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: rgba(255,255,255,0.35);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.hero-news-label::before {
+  content: '';
+  width: 16px; height: 1px;
+  background: rgba(255,255,255,0.25);
+}
+.hero-news-pulse {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--cyan);
+  animation: newsPulse 2s ease-in-out infinite;
+  display: inline-block;
+}
+@keyframes newsPulse { 0%,100%{opacity:0.4;transform:scale(1)} 50%{opacity:1;transform:scale(1.3)} }
+.hero-news-all {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--cyan);
+  text-decoration: none;
+  border: 1px solid rgba(0,240,255,0.25);
+  padding: 5px 12px;
+  border-radius: 3px;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.hero-news-all:hover { background: rgba(0,240,255,0.08); border-color: var(--cyan); }
+.hero-news-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+@media (max-width: 768px) {
+  .hero-news-grid { grid-template-columns: 1fr; gap: 8px; }
+  .hero-news { max-width: 100%; }
+}
+.hero-news-card {
+  background: rgba(13,13,30,0.7);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 6px;
+  padding: 14px;
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  transition: border-color 0.2s, background 0.2s;
+  backdrop-filter: blur(8px);
+  position: relative;
+  overflow: hidden;
+}
+.hero-news-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.hero-news-card:hover { border-color: rgba(0,240,255,0.2); background: rgba(0,240,255,0.04); }
+.hero-news-card:hover::before { opacity: 1; }
+.hnc-source {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 8px; letter-spacing: 2px;
+  color: var(--cyan); opacity: 0.7;
+}
+.hnc-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 10px; font-weight: 600;
+  line-height: 1.45; color: rgba(255,255,255,0.9);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.hnc-time {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 8px; letter-spacing: 1px;
+  color: rgba(255,255,255,0.25);
+  margin-top: auto;
+}
+.hero-news-loading {
+  grid-column: 1/-1; text-align: center;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px; letter-spacing: 3px;
+  color: rgba(255,255,255,0.2); padding: 16px;
+}
+
 /* ===== JUPITER BUTTON ===== */
 #jup-float {
   position: fixed;
@@ -837,6 +945,21 @@ footer {
     <a href="https://pump.fun/coin/4KrNyA5FpFGQj4jQZh1yKzBkobq7mGVftWYVWjfwpump" target="_blank" class="btn-buy">🚀 Buy $HHT</a>
     <a href="https://t.me/HappyHouseToken" target="_blank" class="btn-secondary">Join Telegram</a>
   </div>
+
+  <!-- HERO NEWS STRIP -->
+  <div class="hero-news">
+    <div class="hero-news-header">
+      <div class="hero-news-label">
+        <span class="hero-news-pulse"></span>
+        CRYPTO SIGNAL
+      </div>
+      <a href="hht-news.html" class="hero-news-all">VIEW ALL NEWS →</a>
+    </div>
+    <div class="hero-news-grid" id="heroNewsGrid">
+      <div class="hero-news-loading">ACQUIRING SIGNAL...</div>
+    </div>
+  </div>
+
 </section>
 
 
@@ -1419,5 +1542,52 @@ function copyAddress() {
   </a>
 </div>
 
+
+<script>
+/* ── HERO NEWS STRIP ── */
+(function() {
+  function esc(s) {
+    if (!s) return '';
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function formatDate(str) {
+    if (!str) return '';
+    try {
+      const diff = Date.now() - new Date(str).getTime();
+      const m = Math.floor(diff / 60000);
+      const h = Math.floor(diff / 3600000);
+      if (m < 60) return m + 'MIN AGO';
+      if (h < 24) return h + 'H AGO';
+      return new Date(str).toLocaleDateString('en-US', {month:'short', day:'numeric'}).toUpperCase();
+    } catch(e) { return ''; }
+  }
+
+  async function loadHeroNews() {
+    const grid = document.getElementById('heroNewsGrid');
+    if (!grid) return;
+    try {
+      const res = await fetch('/.netlify/functions/crypto-news');
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      if (!data.success || !data.news.length) throw new Error();
+
+      // Pick 3 most recent
+      const items = data.news.slice(0, 3);
+      grid.innerHTML = items.map(item => `
+        <a class="hero-news-card" href="${esc(item.link)}" target="_blank" rel="noopener">
+          <div class="hnc-source">${esc(item.source).toUpperCase()}</div>
+          <div class="hnc-title">${esc(item.title)}</div>
+          <div class="hnc-time">${formatDate(item.pubDate)}</div>
+        </a>
+      `).join('');
+    } catch(e) {
+      grid.innerHTML = '<div class="hero-news-loading">SIGNAL UNAVAILABLE</div>';
+    }
+  }
+
+  loadHeroNews();
+  setInterval(loadHeroNews, 5 * 60 * 1000);
+})();
+</script>
 </body>
 </html>
