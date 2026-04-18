@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HHT News — Crypto Intelligence | HappyHouseToken</title>
+  <meta name="description" content="Latest crypto intelligence curated for the HappyHouseToken community." />
+  <link rel="icon" href="3873.png" type="image/png" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:          #050608;
+      --surface:     #0a0c10;
+      --surface2:    #0f1118;
+      --line:        rgba(255,255,255,0.08);
+      --line-bright: rgba(255,255,255,0.18);
+      --white:       #ffffff;
+      --off:         rgba(255,255,255,0.55);
+      --dim:         rgba(255,255,255,0.25);
+      --mark:        rgba(255,255,255,0.04);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--white);
+      font-family: 'Syne', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      cursor: crosshair;
+    }
+    /* scan lines */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: repeating-linear-gradient(
+        0deg, transparent, transparent 3px,
+        rgba(255,255,255,0.012) 3px, rgba(255,255,255,0.012) 4px
+      );
+      pointer-events: none; z-index: 0;
+    }
+    /* corner geometry */
+    .geo-corner {
+      position: fixed; width: 300px; height: 300px;
+      pointer-events: none; z-index: 0; opacity: 0.05;
+    }
+    .geo-tl { top: -80px; left: -80px; animation: rotateSlow 50s linear infinite; }
+    .geo-br { bottom: -80px; right: -80px; animation: rotateSlow 50s linear infinite reverse; }
+    @keyframes rotateSlow { to { transform: rotate(360deg); } }
+
+    /* ── STATUS BAR ── */
+    #statusbar {
+      position: relative; z-index: 10;
+      background: var(--surface);
+      border-bottom: 1px solid var(--line);
+      height: 30px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 24px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px; letter-spacing: 2px; color: var(--dim);
+    }
+    .status-left { display: flex; gap: 20px; align-items: center; }
+    .status-dot {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: var(--white); opacity: 0.5;
+      animation: blink 2s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:0.5} 50%{opacity:1} }
+    .status-ticker { overflow: hidden; max-width: 420px; flex: 1; margin: 0 24px; }
+    .status-ticker-inner { white-space: nowrap; animation: tickMove 30s linear infinite; }
+    @keyframes tickMove { 0%{transform:translateX(100%)} 100%{transform:translateX(-100%)} }
+
+    /* ── NAV ── */
+    nav {
+      position: relative; z-index: 10;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 32px; height: 58px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(5,6,8,0.97);
+      backdrop-filter: blur(16px);
+    }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .nav-logo img {
+      width: 28px; height: 28px; border-radius: 50%;
+      filter: grayscale(1) brightness(1.3);
+      border: 1px solid var(--line-bright);
+    }
+    .nav-logo-text {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12px; font-weight: 500;
+      letter-spacing: 4px; color: var(--white);
+    }
+    .nav-links { display: flex; gap: 28px; align-items: center; }
+    .nav-links a {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px; letter-spacing: 2px;
+      color: var(--dim); text-decoration: none;
+      transition: color 0.2s; position: relative;
+    }
+    .nav-links a:hover { color: var(--white); }
+    .nav-links a.active { color: var(--white); }
+    .nav-links a.active::after {
+      content: ''; position: absolute;
+      bottom: -4px; left: 0; right: 0;
+      height: 1px; background: var(--white);
+    }
+    .nav-buy {
+      color: var(--white) !important;
+      border: 1px solid var(--line-bright) !important;
+      padding: 6px 14px; border-radius: 2px;
+      transition: background 0.2s !important;
+    }
+    .nav-buy:hover { background: var(--mark) !important; }
+    .hamburger {
+      display: none; flex-direction: column; gap: 5px;
+      cursor: pointer; background: none; border: none; padding: 4px;
+    }
+    .hamburger span { display: block; width: 20px; height: 1px; background: var(--white); }
+    @media (max-width: 600px) { .nav-links { display: none; } .hamburger { display: flex; } }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative; z-index: 5;
+      width: 100%; height: 520px;
+      overflow: hidden;
+      border-bottom: 1px solid var(--line);
+    }
+    @media (max-width: 768px) { .hero { height: 360px; } }
+    @media (max-width: 480px) { .hero { height: 280px; } }
+
+    .hero-img {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      filter: brightness(0.45) grayscale(0.25);
+      transform: scale(1.04);
+      animation: heroZoom 18s ease-in-out infinite alternate;
+    }
+    @keyframes heroZoom {
+      from { transform: scale(1.04); }
+      to   { transform: scale(1.12); }
+    }
+
+    /* grid overlay on hero */
+    .hero-grid {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+    /* vignette */
+    .hero-vignette {
+      position: absolute; inset: 0;
+      background: linear-gradient(
+        to bottom,
+        rgba(5,6,8,0.15) 0%,
+        transparent 30%,
+        transparent 60%,
+        rgba(5,6,8,0.85) 100%
+      );
+    }
+
+    .hero-content {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      justify-content: flex-end;
+      padding: 48px;
+    }
+    @media (max-width: 600px) { .hero-content { padding: 28px 24px; } }
+
+    .hero-eyebrow {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px; letter-spacing: 5px; color: rgba(255,255,255,0.5);
+      margin-bottom: 14px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .hero-eyebrow::before { content: ''; width: 20px; height: 1px; background: rgba(255,255,255,0.4); }
+
+    .hero h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(42px, 7vw, 88px);
+      font-weight: 800;
+      letter-spacing: -2px;
+      line-height: 0.9;
+      color: var(--white);
+      text-shadow: 0 0 80px rgba(0,0,0,0.8);
+    }
+    .hero h1 em {
+      font-style: normal;
+      color: transparent;
+      -webkit-text-stroke: 1px rgba(255,255,255,0.4);
+    }
+
+    .hero-meta {
+      margin-top: 20px;
+      display: flex; gap: 28px; flex-wrap: wrap;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px; letter-spacing: 3px; color: rgba(255,255,255,0.35);
+    }
+    .hero-meta span { display: flex; align-items: center; gap: 6px; }
+    .hero-meta span::before { content: '◈'; font-size: 7px; }
+
+    /* live badge */
+    .hero-live {
+      position: absolute; top: 24px; right: 28px;
+      display: flex; align-items: center; gap: 7px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px; letter-spacing: 3px;
+      color: var(--white);
+      border: 1px solid rgba(255,255,255,0.25);
+      padding: 6px 14px;
+      background: rgba(5,6,8,0.7);
+      backdrop-filter: blur(8px);
+    }
+    .hero-live-dot {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: #fff;
+      animation: blink 1.5s ease-in-out infinite;
+    }
+
+    /* ── FILTER ── */
+    .filter-bar {
+      position: relative; z-index: 5;
+      max-width: 1360px; margin: 0 auto;
+      padding: 16px 48px;
+      border-bottom: 1px solid var(--line);
+      display: flex; gap: 4px; flex-wrap: wrap;
+      align-items: center; justify-content: space-between;
+    }
+    @media (max-width: 600px) { .filter-bar { padding: 14px 24px; } }
+    .filter-left { display: flex; gap: 4px; flex-wrap: wrap; }
+    .filter-btn {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px; letter-spacing: 3px;
+      padding: 7px 18px;
+      background: transparent; border: 1px solid transparent;
+      color: var(--dim); cursor: pointer;
+      transition: all 0.15s; border-radius: 1px;
+    }
+    .filter-btn:hover { color: var(--white); border-color: var(--line-bright); }
+    .filter-btn.active { color: var(--white); border-color: var(--line-bright); background: var(--mark); }
+    .filter-count {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px; letter-spacing: 2px; color: var(--dim);
+    }
+    .filter-count strong { color: var(--white); }
+
+    /* ── NEWS GRID ── */
+    .news-section {
+      position: relative; z-index: 5;
+      max-width: 1360px; margin: 0 auto;
+      padding: 0 48px 80px;
+    }
+    @media (max-width: 600px) { .news-section { padding: 0 0 60px; } }
+
+    .news-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border-left: 1px solid var(--line);
+      border-top: 1px solid var(--line);
+    }
+    @media (max-width: 960px) { .news-grid { grid-template-columns: repeat(2,1fr); } }
+    @media (max-width: 580px) { .news-grid { grid-template-columns: 1fr; } }
+
+    /* ── CARD ── */
+    .news-card {
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      display: flex; flex-direction: column;
+      text-decoration: none; color: inherit;
+      background: transparent;
+      transition: background 0.2s;
+      opacity: 0;
+      animation: fadeCard 0.45s ease forwards;
+      position: relative; overflow: hidden;
+    }
+    .news-card::after {
+      content: ''; position: absolute;
+      top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent);
+      transform: translateX(-120%);
+      transition: transform 0.5s ease;
+    }
+    .news-card:hover { background: var(--mark); }
+    .news-card:hover::after { transform: translateX(120%); }
+
+    @keyframes fadeCard {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .card-img {
+      width: 100%; height: 160px; overflow: hidden;
+      position: relative; background: var(--surface2);
+    }
+    .card-img img {
+      width: 100%; height: 100%; object-fit: cover; display: block;
+      filter: grayscale(0.65) brightness(0.6);
+      transition: filter 0.35s;
+    }
+    .news-card:hover .card-img img { filter: grayscale(0.15) brightness(0.9); }
+    .card-img-empty {
+      width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; opacity: 0.12;
+      background: repeating-linear-gradient(
+        45deg, var(--surface2), var(--surface2) 12px,
+        rgba(255,255,255,0.02) 12px, rgba(255,255,255,0.02) 24px
+      );
+    }
+    .card-badge {
+      position: absolute; top: 10px; left: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 8px; letter-spacing: 2px;
+      padding: 3px 8px;
+      background: rgba(5,6,8,0.88);
+      border: 1px solid var(--line-bright);
+      color: var(--white);
+      backdrop-filter: blur(6px);
+    }
+    .card-num {
+      position: absolute; bottom: 10px; right: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 20px; font-weight: 300;
+      color: rgba(255,255,255,0.1);
+      letter-spacing: -1px;
+    }
+
+    .card-body {
+      padding: 20px; flex: 1;
+      display: flex; flex-direction: column; gap: 9px;
+    }
+    .card-time {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px; letter-spacing: 2px; color: var(--dim);
+    }
+    .card-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 13px; font-weight: 700;
+      line-height: 1.45; color: var(--white);
+    }
+    .card-desc {
+      font-size: 11px; font-weight: 400;
+      color: var(--off); line-height: 1.7; flex: 1;
+    }
+    .card-cta {
+      display: flex; align-items: center; justify-content: space-between;
+      padding-top: 12px; border-top: 1px solid var(--line);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px; letter-spacing: 2px; color: var(--dim);
+      transition: color 0.2s;
+    }
+    .news-card:hover .card-cta { color: var(--white); }
+    .card-arrow {
+      width: 20px; height: 20px;
+      border: 1px solid var(--line-bright);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; transition: all 0.2s;
+    }
+    .news-card:hover .card-arrow { background: var(--white); color: var(--bg); }
+
+    /* ── LOADING ── */
+    .loading-state {
+      grid-column: 1/-1;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 120px 20px; gap: 20px;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+    .loader-ring {
+      width: 38px; height: 38px;
+      border: 1px solid var(--line-bright);
+      border-top-color: var(--white);
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px; letter-spacing: 4px; color: var(--dim);
+    }
+
+    /* ── ERROR ── */
+    .error-state {
+      grid-column: 1/-1;
+      display: flex; flex-direction: column;
+      align-items: center; gap: 14px;
+      padding: 120px 20px;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+    .error-code {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 72px; font-weight: 300;
+      color: var(--line-bright); letter-spacing: -2px;
+    }
+    .error-msg {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px; letter-spacing: 4px; color: var(--dim);
+    }
+    .retry-btn {
+      margin-top: 8px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px; letter-spacing: 3px;
+      padding: 10px 28px;
+      border: 1px solid var(--line-bright);
+      background: transparent; color: var(--white);
+      cursor: pointer; transition: background 0.2s;
+    }
+    .retry-btn:hover { background: var(--mark); }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative; z-index: 5;
+      border-top: 1px solid var(--line);
+      padding: 24px 48px;
+      display: flex; justify-content: space-between;
+      align-items: center; flex-wrap: wrap; gap: 12px;
+    }
+    @media (max-width: 600px) { footer { padding: 20px 24px; flex-direction: column; text-align: center; } }
+    .footer-left {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px; letter-spacing: 2px; color: var(--dim);
+    }
+    .footer-links { display: flex; gap: 24px; }
+    .footer-links a {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px; letter-spacing: 2px;
+      color: var(--dim); text-decoration: none;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--white); }
+  </style>
+</head>
+<body>
+
+<!-- Corner geometry -->
+<div class="geo-corner geo-tl">
+  <svg viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="150" cy="150" r="130" stroke="white" stroke-width="0.6"/>
+    <circle cx="150" cy="150" r="90"  stroke="white" stroke-width="0.5"/>
+    <circle cx="150" cy="150" r="50"  stroke="white" stroke-width="0.4"/>
+    <line x1="150" y1="0" x2="150" y2="300" stroke="white" stroke-width="0.4"/>
+    <line x1="0" y1="150" x2="300" y2="150" stroke="white" stroke-width="0.4"/>
+    <polygon points="150,20 280,280 20,280" stroke="white" stroke-width="0.5" fill="none"/>
+  </svg>
+</div>
+<div class="geo-corner geo-br">
+  <svg viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="150" cy="150" r="130" stroke="white" stroke-width="0.6"/>
+    <circle cx="150" cy="150" r="70"  stroke="white" stroke-width="0.5"/>
+    <polygon points="150,20 280,280 20,280"  stroke="white" stroke-width="0.4" fill="none"/>
+    <polygon points="150,280 280,20 20,20"   stroke="white" stroke-width="0.3" fill="none"/>
+  </svg>
+</div>
+
+<!-- STATUS BAR -->
+<div id="statusbar">
+  <div class="status-left">
+    <div class="status-dot"></div>
+    <span>SYS:ONLINE</span>
+    <span id="sysTime">--:--:-- UTC</span>
+  </div>
+  <div class="status-ticker">
+    <div class="status-ticker-inner" id="tickerText">INITIALIZING FEED...</div>
+  </div>
+  <span id="lastUpdated">SYNC: —</span>
+</div>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">
+    <img src="3873.png" alt="HHT" />
+    <span class="nav-logo-text">HHT</span>
+  </a>
+  <div class="nav-links">
+    <a href="index.html">HOME</a>
+    <a href="hht-arena.html">ARENA</a>
+    <a href="hht-news.html" class="active">NEWS</a>
+    <a href="hht-library.html">LIBRARY</a>
+    <a href="index.html#buy" class="nav-buy">BUY $HHT</a>
+  </div>
+  <button class="hamburger" onclick="toggleNav()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <img class="hero-img" src="2215.jpg" alt="Crypto Intelligence Feed" />
+  <div class="hero-grid"></div>
+  <div class="hero-vignette"></div>
+
+  <div class="hero-live">
+    <div class="hero-live-dot"></div>
+    LIVE FEED
+  </div>
+
+  <div class="hero-content">
+    <div class="hero-eyebrow">INTELLIGENCE FEED</div>
+    <h1>CRYPTO<br/><em>SIGNAL</em></h1>
+    <div class="hero-meta">
+      <span>3 SOURCES</span>
+      <span>12 DISPATCHES</span>
+      <span>AUTO-SYNC 5MIN</span>
+      <span id="heroUpdated">LOADING...</span>
+    </div>
+  </div>
+</div>
+
+<!-- FILTER -->
+<div class="filter-bar">
+  <div class="filter-left">
+    <button class="filter-btn active" onclick="filterNews('all',this)">ALL</button>
+    <button class="filter-btn" onclick="filterNews('CoinDesk',this)">COINDESK</button>
+    <button class="filter-btn" onclick="filterNews('Cointelegraph',this)">COINTELEGRAPH</button>
+    <button class="filter-btn" onclick="filterNews('Decrypt',this)">DECRYPT</button>
+  </div>
+  <div class="filter-count">SHOWING <strong id="visibleCount">—</strong> DISPATCHES</div>
+</div>
+
+<!-- GRID -->
+<section class="news-section">
+  <div class="news-grid" id="newsGrid">
+    <div class="loading-state">
+      <div class="loader-ring"></div>
+      <div class="loading-label">ACQUIRING SIGNAL</div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-left">© 2025 HAPPYHOUSETOKEN · NOT FINANCIAL ADVICE</div>
+  <div class="footer-links">
+    <a href="index.html">HOME</a>
+    <a href="hht-arena.html">ARENA</a>
+    <a href="HappyHouseToken_Whitepaper_EN.pdf" target="_blank">WHITEPAPER</a>
+  </div>
+</footer>
+
+<script>
+let allNewsData = [];
+
+// Live clock
+function updateClock() {
+  const now = new Date();
+  document.getElementById('sysTime').textContent =
+    now.toUTCString().slice(17,25) + ' UTC';
+}
+updateClock();
+setInterval(updateClock, 1000);
+
+async function fetchNews() {
+  try {
+    const res = await fetch('/.netlify/functions/crypto-news');
+    if (!res.ok) throw new Error('fetch failed');
+    const data = await res.json();
+    if (!data.success || !data.news.length) throw new Error('empty');
+
+    allNewsData = data.news;
+
+    const t = new Date(data.lastUpdated);
+    const timeStr = t.toUTCString().slice(17,22) + ' UTC';
+    document.getElementById('lastUpdated').textContent = 'SYNC: ' + timeStr;
+    document.getElementById('heroUpdated').textContent = 'SYNCED ' + timeStr;
+
+    // Ticker from headlines
+    const titles = data.news.map(n => n.title).join('   ·   ');
+    document.getElementById('tickerText').textContent = titles + '   ·   ' + titles;
+
+    renderNews(allNewsData);
+  } catch(e) { showError(); }
+}
+
+function renderNews(items) {
+  const grid = document.getElementById('newsGrid');
+  document.getElementById('visibleCount').textContent = items.length;
+
+  if (!items.length) {
+    grid.innerHTML = `<div class="error-state">
+      <div class="error-code">404</div>
+      <div class="error-msg">NO SIGNAL FOR THIS SOURCE</div>
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML = items.map((item, i) => `
+    <a class="news-card" href="${esc(item.link)}" target="_blank" rel="noopener"
+       style="animation-delay:${i * 0.06}s">
+      <div class="card-img">
+        ${item.image
+          ? `<img src="${esc(item.image)}" alt="" loading="lazy"
+               onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+          : ''}
+        <div class="card-img-empty" ${item.image ? 'style="display:none"' : ''}>◈</div>
+        <div class="card-badge">${esc(item.source).toUpperCase()}</div>
+        <div class="card-num">${String(i + 1).padStart(2,'0')}</div>
+      </div>
+      <div class="card-body">
+        <div class="card-time">${formatDate(item.pubDate)}</div>
+        <div class="card-title">${esc(item.title)}</div>
+        ${item.description ? `<div class="card-desc">${esc(item.description)}</div>` : ''}
+        <div class="card-cta">
+          <span>READ DISPATCH</span>
+          <div class="card-arrow">→</div>
+        </div>
+      </div>
+    </a>
+  `).join('');
+}
+
+function filterNews(source, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const filtered = source === 'all' ? allNewsData : allNewsData.filter(n => n.source === source);
+  renderNews(filtered);
+}
+
+function showError() {
+  document.getElementById('newsGrid').innerHTML = `
+    <div class="error-state">
+      <div class="error-code">503</div>
+      <div class="error-msg">SIGNAL LOST — FEED UNAVAILABLE</div>
+      <button class="retry-btn" onclick="fetchNews()">RETRY CONNECTION</button>
+    </div>`;
+  document.getElementById('lastUpdated').textContent = 'SYNC: FAILED';
+  document.getElementById('heroUpdated').textContent = 'SYNC FAILED';
+}
+
+function formatDate(str) {
+  if (!str) return '';
+  try {
+    const diff = Date.now() - new Date(str).getTime();
+    const m = Math.floor(diff/60000);
+    const h = Math.floor(diff/3600000);
+    if (m < 60) return m + 'MIN AGO';
+    if (h < 24) return h + 'H AGO';
+    return new Date(str).toLocaleDateString('en-US',{month:'short',day:'numeric'}).toUpperCase();
+  } catch { return ''; }
+}
+
+function esc(s) {
+  if (!s) return '';
+  return String(s)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+function toggleNav() {
+  const links = document.querySelector('.nav-links');
+  const open = links.style.display === 'flex';
+  links.style.display = open ? 'none' : 'flex';
+  if (!open) Object.assign(links.style, {
+    flexDirection:'column', position:'absolute',
+    top:'90px', right:'20px', background:'#050608',
+    border:'1px solid rgba(255,255,255,0.12)',
+    padding:'20px 24px', gap:'16px', zIndex:'100'
+  });
+}
+
+fetchNews();
+setInterval(fetchNews, 5 * 60 * 1000);
+</script>
+</body>
+</html>
