@@ -3,8 +3,8 @@ const http = require('http');
 
 const FEEDS = [
   {
-    name: 'CoinDesk',
-    url: 'https://www.coindesk.com/arc/outboundfeeds/rss/',
+    name: 'Bitcoin Magazine',
+    url: 'https://bitcoinmagazine.com/.rss/full/',
     count: 4
   },
   {
