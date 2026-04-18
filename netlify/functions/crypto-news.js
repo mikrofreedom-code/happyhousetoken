@@ -3,8 +3,8 @@ const http = require('http');
 
 const FEEDS = [
   {
-    name: 'Bitcoin Magazine',
-    url: 'https://bitcoinmagazine.com/.rss/full/',
+    name: 'CryptoNews',
+    url: 'https://cryptonews.com/news/feed/',
     count: 4
   },
   {
