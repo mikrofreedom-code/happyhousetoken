@@ -991,8 +991,8 @@
       </div>
       <div class="season-bar" id="seasonBar">
         <div class="season-info">
-          <span class="season-label" id="seasonLabel">Season —</span>
-          <span class="season-countdown" id="seasonCountdown">Loading...</span>
+          <span class="season-label" id="seasonLabel">Current Season</span>
+          <span class="season-countdown" id="seasonCountdown">🏆 Top 10</span>
         </div>
         <div class="season-prize">🏠 Winner gets $HHT</div>
       </div>
@@ -1004,16 +1004,11 @@
 
   <script>
   // ══════════════════════════════════════════════
-  // SUPABASE CONFIG — vymeň za svoje hodnoty!
+  // SUPABASE CONFIG
   // ══════════════════════════════════════════════
   var SUPABASE_URL  = 'https://sndnglmrpgdzwdilgapj.supabase.co';
   var SUPABASE_KEY  = 'sb_publishable_WWwRrWf9BDpCAgcFVaQ5ow_fE3IDZU3';
   var TABLE_NAME    = 'hht_2048_leaderboard';
-  var SEASONS_TABLE = 'hht_2048_seasons';
-
-  // Season config
-  var SEASON_END_DATE    = new Date('2026-04-19T20:00:00Z'); // Nedeľa 19.4.2026 22:00 SK
-  var LOCKDOWN_MS        = 5 * 60 * 1000;            // 5 minutes
 
   // ══════════════════════════════════════════════
   // SUPABASE HELPERS
@@ -1030,160 +1025,6 @@
       body: body ? JSON.stringify(body) : undefined
     }).then(function(r) { return r.json(); });
   }
-
-  // ══════════════════════════════════════════════
-  // SEASON STATE
-  // ══════════════════════════════════════════════
-  var currentSeason = null;  // { id, number, started_at, ends_at }
-  var countdownInterval = null;
-
-  async function loadSeason() {
-    try {
-      var rows = await sbFetch('GET', SEASONS_TABLE + '?order=started_at.desc&limit=1&select=id,number,started_at,ends_at');
-
-      if (!Array.isArray(rows) || rows.length === 0) {
-        // No season exists yet — create first one
-        await createNewSeason(1);
-        return;
-      }
-
-      var s = rows[0];
-      var now = Date.now();
-      var endsAt = new Date(s.ends_at).getTime();
-
-      if (now > endsAt + LOCKDOWN_MS) {
-        // Season ended — stay locked until admin updates SEASON_END_DATE and redeploys
-        currentSeason = {
-          id: s.id,
-          number: s.number,
-          startedAt: new Date(s.started_at).getTime(),
-          endsAt: endsAt
-        };
-        var banner = document.getElementById('lockdownBanner');
-        if (banner) {
-          banner.textContent = '🔒 Season ended — next season coming soon!';
-          banner.classList.add('visible');
-        }
-        var countdownEl = document.getElementById('seasonCountdown');
-        if (countdownEl) countdownEl.textContent = '🔒 Season Over';
-        var labelEl = document.getElementById('seasonLabel');
-        if (labelEl) labelEl.textContent = 'Season ' + s.number;
-        loadLeaderboard();
-      } else {
-        currentSeason = {
-          id: s.id,
-          number: s.number,
-          startedAt: new Date(s.started_at).getTime(),
-          endsAt: endsAt
-        };
-        startCountdown();
-        loadLeaderboard();
-      }
-    } catch(e) {
-      console.warn('Season load failed:', e);
-    }
-  }
-
-  async function createNewSeason(number) {
-    var now = new Date();
-    var endsAt = SEASON_END_DATE;
-    try {
-      var result = await sbFetch('POST', SEASONS_TABLE, {
-        number: number,
-        started_at: now.toISOString(),
-        ends_at: endsAt.toISOString()
-      });
-      if (Array.isArray(result) && result[0]) {
-        currentSeason = {
-          id: result[0].id,
-          number: result[0].number,
-          startedAt: now.getTime(),
-          endsAt: endsAt.getTime()
-        };
-        // Reset all scores for new season (keep player records, only wipe scores)
-        await sbFetch('PATCH', TABLE_NAME + '?best_score=gte.0', { best_score: 0 });
-        startCountdown();
-        loadLeaderboard();
-      }
-    } catch(e) {
-      console.warn('Season create failed:', e);
-    }
-  }
-
-  function isLockdown() {
-    if (!currentSeason) return false;
-    var now = Date.now();
-    var beforeReset = currentSeason.endsAt - LOCKDOWN_MS;
-    var afterReset  = currentSeason.endsAt + LOCKDOWN_MS;
-    return now >= beforeReset && now <= afterReset;
-  }
-
-  function startCountdown() {
-    if (countdownInterval) clearInterval(countdownInterval);
-    updateCountdown();
-    countdownInterval = setInterval(updateCountdown, 1000);
-  }
-
-  function updateCountdown() {
-    if (!currentSeason) return;
-    var now      = Date.now();
-    var endsAt   = currentSeason.endsAt;
-    var diff     = endsAt - now;
-    var lockdown = isLockdown();
-
-    // Update lockdown banner
-    var banner = document.getElementById('lockdownBanner');
-    if (lockdown) {
-      banner.classList.add('visible');
-    } else {
-      banner.classList.remove('visible');
-    }
-
-    // Update countdown label
-    var labelEl     = document.getElementById('seasonLabel');
-    var countdownEl = document.getElementById('seasonCountdown');
-
-    if (labelEl) labelEl.textContent = 'Season ' + currentSeason.number;
-
-    if (!countdownEl) return;
-
-    if (lockdown && now > endsAt) {
-      countdownEl.textContent = '🔒 Resetting...';
-      countdownEl.className = 'season-countdown lockdown';
-      // Trigger new season check
-      setTimeout(function() { loadSeason(); }, LOCKDOWN_MS);
-      clearInterval(countdownInterval);
-      return;
-    }
-
-    if (lockdown) {
-      var secToEnd = Math.max(0, Math.ceil((endsAt - now) / 1000));
-      countdownEl.textContent = '🔒 Ends in ' + formatTime(secToEnd);
-      countdownEl.className = 'season-countdown lockdown';
-      return;
-    }
-
-    if (diff <= 0) {
-      countdownEl.textContent = '🔒 Resetting...';
-      countdownEl.className = 'season-countdown lockdown';
-      return;
-    }
-
-    countdownEl.textContent = '⏱ ' + formatTime(Math.floor(diff / 1000));
-    countdownEl.className = 'season-countdown';
-  }
-
-  function formatTime(totalSeconds) {
-    var d = Math.floor(totalSeconds / 86400);
-    var h = Math.floor((totalSeconds % 86400) / 3600);
-    var m = Math.floor((totalSeconds % 3600) / 60);
-    var s = totalSeconds % 60;
-    if (d > 0) return d + 'd ' + pad(h) + 'h ' + pad(m) + 'm';
-    if (h > 0) return pad(h) + 'h ' + pad(m) + 'm ' + pad(s) + 's';
-    return pad(m) + 'm ' + pad(s) + 's';
-  }
-
-  function pad(n) { return n < 10 ? '0' + n : String(n); }
 
   // ══════════════════════════════════════════════
   // PLAYER STATE
@@ -1348,14 +1189,7 @@
     btn.disabled = true; btn.textContent = 'Registering...';
 
     try {
-      var existing = await sbFetch('GET', TABLE_NAME + '?wallet=eq.' + encodeURIComponent(wallet) + '&select=id,name,wallet');
-      if (Array.isArray(existing) && existing.length > 0) {
-        player = { id: existing[0].id, name: existing[0].name, wallet: existing[0].wallet };
-      } else {
-        var result = await sbFetch('POST', TABLE_NAME, { name: name, wallet: wallet, best_score: 0 });
-        if (!Array.isArray(result) || !result[0]) throw new Error('Insert failed');
-        player = { id: result[0].id, name: result[0].name, wallet: result[0].wallet };
-      }
+      player = { name: name, wallet: wallet };
       savePlayerToStorage(player);
       closeOverlay();
       showPlayerBar(player);
@@ -1392,7 +1226,7 @@
     body.innerHTML = '<div class="lb-loading">Loading...</div>';
     try {
       var rows = await sbFetch('GET',
-        TABLE_NAME + '?select=id,name,wallet,best_score&order=best_score.desc&limit=10'
+        TABLE_NAME + '?select=wallet,nickname,score,highest_tile&order=score.desc&limit=10'
       );
       if (!Array.isArray(rows) || rows.length === 0) {
         body.innerHTML = '<div class="lb-loading">No scores yet — be the first! 🏠</div>';
@@ -1402,20 +1236,20 @@
       var rankLabels  = ['🥇','🥈','🥉'];
       var rankClasses = ['gold','silver','bronze'];
       rows.forEach(function(row, i) {
-        var isMe      = player && row.id === player.id;
-        var isWinner  = i === 0 && row.best_score > 0;
+        var isMe      = player && row.wallet === player.wallet;
+        var isWinner  = i === 0 && row.score > 0;
         var rankLabel = i < 3 ? rankLabels[i] : (i + 1);
         var rankClass = i < 3 ? rankClasses[i] : '';
-        var initial   = (row.name || '?').charAt(0).toUpperCase();
+        var initial   = (row.nickname || '?').charAt(0).toUpperCase();
         var rowClass  = 'lb-row' + (isMe ? ' is-me' : '') + (isWinner ? ' is-winner' : '');
         html += '<div class="' + rowClass + '">';
         html += '<div class="lb-rank ' + rankClass + '">' + rankLabel + '</div>';
         html += '<div class="lb-avatar">' + initial + '</div>';
         html += '<div class="lb-player">';
-        html += '<div class="lb-player-name">' + escHtml(row.name) + (isMe ? ' 👈' : '') + '</div>';
+        html += '<div class="lb-player-name">' + escHtml(row.nickname) + (isMe ? ' 👈' : '') + '</div>';
         html += '<div class="lb-player-wallet">' + shortenWallet(row.wallet) + '</div>';
         html += '</div>';
-        html += '<div class="lb-score">' + Number(row.best_score).toLocaleString() + '</div>';
+        html += '<div class="lb-score">' + Number(row.score).toLocaleString() + '</div>';
         html += '</div>';
       });
       body.innerHTML = html;
@@ -1433,12 +1267,21 @@
   // ══════════════════════════════════════════════
   async function submitScore(score) {
     if (!player) return;
-    if (isLockdown()) return; // 🔒 blocked during lockdown
+    if (score <= 0) return;
     try {
-      await sbFetch('PATCH',
-        TABLE_NAME + '?id=eq.' + player.id + '&best_score=lt.' + score,
-        { best_score: score }
-      );
+      // Find highest tile on the grid
+      var highestTile = 0;
+      if (window._gameManager && window._gameManager.grid) {
+        window._gameManager.grid.eachCell(function(x, y, tile) {
+          if (tile && tile.value > highestTile) highestTile = tile.value;
+        });
+      }
+      await sbFetch('POST', TABLE_NAME, {
+        wallet: player.wallet,
+        nickname: player.name,
+        score: score,
+        highest_tile: highestTile || 0
+      });
       if (lbVisible) loadLeaderboard();
     } catch(e) { /* silent */ }
   }
@@ -1452,8 +1295,8 @@
       player = saved;
       closeOverlay();
       showPlayerBar(saved);
+      loadLeaderboard();
     }
-    loadSeason();
     initMobileCheck();
   })();
 
@@ -1765,7 +1608,7 @@
   };
 
   // ── START ──
-  new GameManager(4, InputManager, Actuator, StorageManager);
+  window._gameManager = new GameManager(4, InputManager, Actuator, StorageManager);
   </script>
 </body>
 </html>

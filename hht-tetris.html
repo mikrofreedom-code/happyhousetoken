@@ -344,62 +344,7 @@
 // ══════════════════════════════════════════════
 var SUPABASE_URL = 'https://sndnglmrpgdzwdilgapj.supabase.co';
 var SUPABASE_KEY = 'sb_publishable_WWwRrWf9BDpCAgcFVaQ5ow_fE3IDZU3';
-var TABLE_NAME    = 'hht_tetris_leaderboard';
-var SEASONS_TABLE = 'hht_tetris_seasons';
-var ARCHIVE_TABLE = 'hht_tetris_archive';
-var SEASON_DURATION_MS = 5 * 24 * 60 * 60 * 1000; // 5 days
-var LOCKDOWN_MS        = 5 * 60 * 1000;            // 5 minutes
-
-var currentSeason = null;
-var countdownInterval = null;
-
-async function loadSeason() {
-  try {
-    var rows = await sbFetch('GET', SEASONS_TABLE + '?order=started_at.desc&limit=1&select=id,number,started_at,ends_at');
-    if (!Array.isArray(rows) || rows.length === 0) {
-      await createNewSeason(1); return;
-    }
-    var s = rows[0];
-    var now = Date.now();
-    var endsAt = new Date(s.ends_at).getTime();
-    if (now > endsAt + LOCKDOWN_MS) {
-      await createNewSeason(s.number + 1);
-    } else {
-      currentSeason = { id: s.id, number: s.number, startedAt: new Date(s.started_at).getTime(), endsAt: endsAt };
-    }
-  } catch(e) { console.warn('Season load failed:', e); }
-}
-
-async function createNewSeason(number) {
-  var now = new Date();
-  var endsAt = new Date(now.getTime() + SEASON_DURATION_MS);
-  try {
-    var result = await sbFetch('POST', SEASONS_TABLE, {
-      number: number, started_at: now.toISOString(), ends_at: endsAt.toISOString()
-    });
-    if (Array.isArray(result) && result[0]) {
-      currentSeason = { id: result[0].id, number: result[0].number, startedAt: now.getTime(), endsAt: endsAt.getTime() };
-      // Archive before delete
-      try {
-        var existing = await sbFetch('GET', TABLE_NAME + '?best_score=gt.0&select=id,name,wallet,best_score');
-        if (Array.isArray(existing) && existing.length > 0) {
-          var archiveRows = existing.map(function(row) {
-            return { player_id: row.id, name: row.name, wallet: row.wallet, best_score: row.best_score, season_number: number - 1, archived_at: now.toISOString() };
-          });
-          await sbFetch('POST', ARCHIVE_TABLE, archiveRows);
-        }
-      } catch(e) { console.warn('Archive failed:', e); }
-      // Delete all rows — clean leaderboard
-      await sbFetch('DELETE', TABLE_NAME + '?id=neq.00000000-0000-0000-0000-000000000000');
-    }
-  } catch(e) { console.warn('Season create failed:', e); }
-}
-
-function isLockdown() {
-  if (!currentSeason) return false;
-  var now = Date.now();
-  return now >= (currentSeason.endsAt - LOCKDOWN_MS) && now <= (currentSeason.endsAt + LOCKDOWN_MS);
-}
+var TABLE_NAME   = 'hht_tetris_leaderboard';
 
 function sbFetch(method, path, body) {
     return fetch(SUPABASE_URL + '/rest/v1/' + path, {
@@ -505,14 +450,7 @@ async function submitRegistration() {
     var btn = document.getElementById('regSubmit');
     btn.disabled = true; btn.textContent = 'Registering...';
     try {
-        var existing = await sbFetch('GET', TABLE_NAME + '?wallet=eq.' + encodeURIComponent(wallet) + '&select=id,name,wallet');
-        if (Array.isArray(existing) && existing.length > 0) {
-            player = { id: existing[0].id, name: existing[0].name, wallet: existing[0].wallet };
-        } else {
-            var result = await sbFetch('POST', TABLE_NAME, { name: name, wallet: wallet, best_score: 0 });
-            if (!Array.isArray(result) || !result[0]) throw new Error('Insert failed');
-            player = { id: result[0].id, name: result[0].name, wallet: result[0].wallet };
-        }
+        player = { name: name, wallet: wallet };
         savePlayerToStorage(player);
         closeOverlay();
         showPlayerBar(player);
@@ -540,25 +478,25 @@ async function loadLeaderboard() {
     var body = document.getElementById('lbBody');
     body.innerHTML = '<div class="lb-loading">Loading...</div>';
     try {
-        var rows = await sbFetch('GET', TABLE_NAME + '?select=id,name,wallet,best_score&order=best_score.desc&limit=10');
+        var rows = await sbFetch('GET', TABLE_NAME + '?select=wallet,nickname,score,level,lines&order=score.desc&limit=10');
         if (!Array.isArray(rows) || rows.length === 0) {
             body.innerHTML = '<div class="lb-loading">No scores yet — be the first! 🏠</div>'; return;
         }
         var rankLabels  = ['🥇','🥈','🥉'];
         var rankClasses = ['gold','silver','bronze'];
         body.innerHTML = rows.map(function(row, i) {
-            var isMe    = player && row.id === player.id;
+            var isMe    = player && row.wallet === player.wallet;
             var rowCls  = 'lb-row' + (isMe ? ' is-me' : '');
             var rankLbl = i < 3 ? rankLabels[i] : (i + 1);
             var rankCls = i < 3 ? rankClasses[i] : '';
             return '<div class="' + rowCls + '">' +
                 '<div class="lb-rank ' + rankCls + '">' + rankLbl + '</div>' +
-                '<div class="lb-avatar">' + (row.name||'?').charAt(0).toUpperCase() + '</div>' +
+                '<div class="lb-avatar">' + (row.nickname||'?').charAt(0).toUpperCase() + '</div>' +
                 '<div class="lb-player">' +
-                    '<div class="lb-player-name">' + escHtml(row.name) + (isMe ? ' 👈' : '') + '</div>' +
-                    '<div class="lb-player-wallet">' + shortenWallet(row.wallet) + '</div>' +
+                    '<div class="lb-player-name">' + escHtml(row.nickname) + (isMe ? ' 👈' : '') + '</div>' +
+                    '<div class="lb-player-wallet">' + shortenWallet(row.wallet) + ' · Lv' + (row.level||1) + '</div>' +
                 '</div>' +
-                '<div class="lb-score">' + Number(row.best_score).toLocaleString() + '</div>' +
+                '<div class="lb-score">' + Number(row.score).toLocaleString() + '</div>' +
             '</div>';
         }).join('');
     } catch(e) {
@@ -573,9 +511,17 @@ function escHtml(str) {
 // ── SCORE SUBMISSION ──
 async function submitScore(score) {
     if (!player) return;
-    if (isLockdown()) return;
+    if (score <= 0) return;
     try {
-        await sbFetch('PATCH', TABLE_NAME + '?id=eq.' + player.id + '&best_score=lt.' + score, { best_score: score });
+        // level = how many times speed increased (every 10 lines), lines = AllLinesRemoved
+        var level = Math.floor(AllLinesRemoved / 10) + 1;
+        await sbFetch('POST', TABLE_NAME, {
+            wallet: player.wallet,
+            nickname: player.name,
+            score: score,
+            level: level,
+            lines: AllLinesRemoved
+        });
         if (lbVisible) loadLeaderboard();
     } catch(e) { /* silent */ }
 }
@@ -583,8 +529,7 @@ async function submitScore(score) {
 // ── INIT ──
 (function init() {
     var saved = loadPlayerFromStorage();
-    if (saved) { player = saved; closeOverlay(); showPlayerBar(saved); }
-    loadSeason();
+    if (saved) { player = saved; closeOverlay(); showPlayerBar(saved); loadLeaderboard(); }
     initMobileCheck();
 })();
 

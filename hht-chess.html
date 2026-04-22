@@ -299,6 +299,130 @@ body {
 @media(max-width:380px){
   #chessboard { width:min(98vw,340px); height:min(98vw,340px); }
 }
+
+/* ═══ LEADERBOARD & REGISTRATION ══════════════ */
+.reg-overlay-c {
+  position:fixed; inset:0; z-index:2000;
+  background:rgba(0,0,0,0.92); backdrop-filter:blur(6px);
+  display:flex; align-items:center; justify-content:center; padding:20px;
+}
+.reg-overlay-c.hidden { display:none; }
+.reg-modal-c {
+  background:var(--panel); border:2px solid var(--gold);
+  border-radius:14px; padding:28px 24px;
+  width:100%; max-width:400px;
+  box-shadow:0 0 50px rgba(240,192,64,0.25);
+}
+.reg-modal-c h2 {
+  font-family:var(--font-head); font-size:13px;
+  color:var(--gold); text-shadow:0 0 14px rgba(240,192,64,0.6);
+  margin-bottom:8px; line-height:1.7;
+}
+.reg-modal-c p { font-size:12px; color:rgba(255,255,255,0.35); margin-bottom:20px; line-height:1.7; font-family:var(--font-body); }
+.c-label { display:block; font-family:var(--font-head); font-size:8px; letter-spacing:2px; color:rgba(240,192,64,0.6); margin-bottom:6px; text-transform:uppercase; }
+.c-input {
+  width:100%; background:var(--bg2); border:1px solid rgba(240,192,64,0.2);
+  border-radius:7px; padding:11px 14px; color:#fff;
+  font-size:14px; font-family:var(--font-body); outline:none;
+  transition:border-color 0.15s; margin-bottom:14px;
+}
+.c-input:focus { border-color:var(--gold); box-shadow:0 0 14px rgba(240,192,64,0.2); }
+.c-input::placeholder { color:rgba(255,255,255,0.15); }
+.c-wallet-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px; }
+.c-wallet-btn {
+  display:flex; align-items:center; gap:8px;
+  background:var(--bg2); border:1.5px solid rgba(255,255,255,0.08);
+  border-radius:8px; padding:10px 12px; cursor:pointer;
+  color:#fff; font-family:var(--font-body); font-size:13px;
+  transition:border-color 0.15s, background 0.15s;
+}
+.c-wallet-btn:hover { border-color:rgba(240,192,64,0.45); background:rgba(240,192,64,0.07); }
+.c-wallet-btn:disabled { opacity:0.4; cursor:not-allowed; }
+.c-wallet-connected {
+  display:flex; align-items:center; gap:10px;
+  background:rgba(61,255,0,0.06); border:1px solid rgba(61,255,0,0.2);
+  border-radius:8px; padding:10px 14px; margin-bottom:14px;
+}
+.c-wallet-check { width:28px; height:28px; background:#3dff00; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; color:#000; flex-shrink:0; }
+.c-wallet-change { margin-left:auto; background:none; border:1px solid rgba(255,255,255,0.1); border-radius:5px; color:rgba(255,255,255,0.4); font-size:11px; padding:4px 8px; cursor:pointer; font-family:var(--font-head); }
+.c-reg-btn {
+  width:100%; padding:13px; border-radius:8px; border:none;
+  background:linear-gradient(135deg,#c8960a,#f0c040,#c8960a);
+  color:#0d0d18; font-family:var(--font-head); font-size:10px;
+  letter-spacing:1px; cursor:pointer;
+  box-shadow:0 0 20px rgba(240,192,64,0.4); transition:box-shadow 0.15s; margin-top:4px;
+}
+.c-reg-btn:hover { box-shadow:0 0 36px rgba(240,192,64,0.7); }
+.c-reg-btn:disabled { background:var(--bg2); color:rgba(255,255,255,0.2); cursor:not-allowed; box-shadow:none; }
+.c-skip-btn {
+  width:100%; background:transparent; color:rgba(255,255,255,0.3);
+  border:1px solid rgba(255,255,255,0.1); border-radius:8px;
+  padding:11px; font-family:var(--font-body); font-size:13px;
+  cursor:pointer; margin-top:8px; transition:border-color 0.15s, color 0.15s;
+}
+.c-skip-btn:hover { border-color:rgba(240,192,64,0.3); color:rgba(240,192,64,0.7); }
+.c-reg-error {
+  background:rgba(255,68,68,0.1); border:1px solid rgba(255,68,68,0.3);
+  color:#ff8080; border-radius:7px; padding:10px 14px;
+  font-size:12px; margin-top:10px; display:none; font-family:var(--font-body);
+}
+.c-mpb {
+  display:flex; align-items:center; gap:10px;
+  background:rgba(171,159,242,0.08); border:1.5px solid rgba(171,159,242,0.2);
+  border-radius:8px; padding:12px; margin-bottom:12px;
+}
+.c-mpb-open { background:#ab9ff2; color:#111; border:none; border-radius:6px; padding:7px 12px; font-size:12px; font-weight:700; cursor:pointer; flex-shrink:0; font-family:var(--font-head); }
+
+/* Player bar in header */
+#c-player-bar {
+  display:none; align-items:center; gap:8px;
+  background:rgba(240,192,64,0.07); border:1px solid rgba(240,192,64,0.2);
+  border-radius:8px; padding:5px 12px 5px 8px;
+}
+#c-player-bar.visible { display:flex; }
+.c-pb-avatar { width:24px; height:24px; background:var(--gold); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:900; color:#0d0d18; flex-shrink:0; }
+.c-pb-name { font-family:var(--font-head); font-size:9px; color:#fff; letter-spacing:1px; }
+.c-pb-lb-btn {
+  background:rgba(0,229,255,0.07); border:1px solid rgba(0,229,255,0.22);
+  color:var(--cyan); border-radius:5px; padding:4px 9px;
+  font-family:var(--font-head); font-size:7px; letter-spacing:1px;
+  cursor:pointer; transition:all 0.15s;
+}
+.c-pb-lb-btn:hover { background:rgba(0,229,255,0.16); }
+
+/* LB Modal */
+.c-lb-overlay {
+  position:fixed; inset:0; z-index:1500;
+  background:rgba(0,0,0,0.88); backdrop-filter:blur(6px);
+  display:flex; align-items:center; justify-content:center; padding:20px;
+}
+.c-lb-overlay.hidden { display:none; }
+.c-lb-modal {
+  background:var(--panel); border:2px solid var(--gold);
+  border-radius:14px; overflow:hidden;
+  width:100%; max-width:460px; max-height:85vh; overflow-y:auto;
+  box-shadow:0 0 50px rgba(240,192,64,0.2);
+}
+.c-lb-head { display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border-bottom:1px solid rgba(240,192,64,0.12); }
+.c-lb-title { font-family:var(--font-head); font-size:10px; color:var(--gold); text-shadow:0 0 10px rgba(240,192,64,0.5); letter-spacing:1px; }
+.c-lb-close { background:none; border:none; color:rgba(255,255,255,0.3); cursor:pointer; font-size:18px; padding:4px 8px; transition:color 0.15s; }
+.c-lb-close:hover { color:#fff; }
+.c-lb-refresh { background:none; border:none; color:rgba(255,255,255,0.3); cursor:pointer; font-size:14px; padding:4px; transition:color 0.15s; }
+.c-lb-refresh:hover { color:var(--gold); }
+.c-lb-body { padding:6px 0; min-height:60px; }
+.c-lb-loading { text-align:center; padding:20px; color:rgba(255,255,255,0.3); font-size:12px; font-family:var(--font-body); }
+.c-lb-row { display:flex; align-items:center; padding:9px 16px; gap:10px; border-bottom:1px solid rgba(240,192,64,0.05); transition:background 0.1s; }
+.c-lb-row:hover { background:rgba(240,192,64,0.04); }
+.c-lb-row.is-me { background:rgba(0,229,255,0.05); border-left:2px solid var(--cyan); }
+.c-lb-rank { width:24px; text-align:center; font-family:var(--font-head); font-size:9px; color:rgba(255,255,255,0.3); flex-shrink:0; }
+.c-lb-rank.gold { color:var(--gold2); text-shadow:0 0 8px var(--gold2); }
+.c-lb-rank.silver { color:#b0b8c8; }
+.c-lb-rank.bronze { color:#cd7f32; }
+.c-lb-avatar { width:30px; height:30px; border-radius:50%; background:var(--bg2); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:900; color:var(--gold); flex-shrink:0; border:1px solid rgba(240,192,64,0.2); }
+.c-lb-player { flex:1; min-width:0; }
+.c-lb-player-name { font-size:13px; font-weight:700; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-family:var(--font-body); }
+.c-lb-player-sub { font-size:10px; color:rgba(255,255,255,0.3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-family:var(--font-body); }
+.c-lb-score { font-family:var(--font-head); font-size:10px; color:var(--gold); text-shadow:0 0 8px rgba(240,192,64,0.5); flex-shrink:0; text-align:right; }
 </style>
 </head>
 <body>
@@ -307,7 +431,68 @@ body {
 <div class="hdr">
   <a href="hht-arena.html" class="logo">HHT <span>♟</span> CHESS</a>
   <div class="hdr-right">
+    <div id="c-player-bar">
+      <div class="c-pb-avatar" id="cPbAvatar">?</div>
+      <div class="c-pb-name" id="cPbName">—</div>
+      <button class="c-pb-lb-btn" onclick="cToggleLb()">🏆 LB</button>
+    </div>
     <a href="hht-arena.html" class="back-link">← ARENA</a>
+  </div>
+</div>
+
+<!-- REGISTRATION OVERLAY -->
+<div class="reg-overlay-c" id="cRegOverlay">
+  <div class="reg-modal-c">
+    <div style="font-size:36px;margin-bottom:12px;">♟</div>
+    <h2>Join the Leaderboard</h2>
+    <p>Connect your Solana wallet and enter a name to track your wins on the HHT Chess leaderboard.</p>
+    <div id="cStepConnect">
+      <div id="cMobileBanner" class="c-mpb hidden">
+        <div style="font-size:26px;">👻</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:3px;">Open in Phantom Browser</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.35);">Tap below to open inside the Phantom app</div>
+        </div>
+        <button class="c-mpb-open" onclick="cOpenPhantom()">Open →</button>
+      </div>
+      <div class="c-wallet-grid" id="cWalletGrid">
+        <button class="c-wallet-btn" onclick="cConnectWallet('phantom')"><div style="width:30px;height:30px;background:#ab9ff2;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">👻</div><div><div>Phantom</div><div style="font-size:10px;color:rgba(255,255,255,0.35);">Most popular</div></div></button>
+        <button class="c-wallet-btn" onclick="cConnectWallet('solflare')"><div style="width:30px;height:30px;background:#fc7227;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">🔆</div><div><div>Solflare</div><div style="font-size:10px;color:rgba(255,255,255,0.35);">solflare.com</div></div></button>
+        <button class="c-wallet-btn" onclick="cConnectWallet('backpack')"><div style="width:30px;height:30px;background:#e33e3f;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">🎒</div><div><div>Backpack</div><div style="font-size:10px;color:rgba(255,255,255,0.35);">backpack.app</div></div></button>
+        <button class="c-wallet-btn" onclick="cConnectWallet('trust')"><div style="width:30px;height:30px;background:#3375bb;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">🛡️</div><div><div>Trust Wallet</div><div style="font-size:10px;color:rgba(255,255,255,0.35);">Mobile</div></div></button>
+      </div>
+    </div>
+    <div class="c-wallet-connected hidden" id="cWalletConnected">
+      <div class="c-wallet-check">✓</div>
+      <div>
+        <div style="font-weight:700;font-size:13px;color:#fff;" id="cProviderName">Wallet</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.35);" id="cWalletDisplay">—</div>
+      </div>
+      <button class="c-wallet-change" onclick="cChangeWallet()">Change</button>
+    </div>
+    <div id="cStepName" class="hidden">
+      <label class="c-label">Player Name</label>
+      <input type="text" class="c-input" id="cRegName" placeholder="e.g. ChessMaster" maxlength="30" autocomplete="off">
+    </div>
+    <button class="c-reg-btn hidden" id="cRegSubmit" onclick="cSubmitRegistration()">🎮 Start Playing</button>
+    <button class="c-skip-btn" onclick="cSkipRegistration()">Play without leaderboard</button>
+    <div class="c-reg-error" id="cRegError"></div>
+  </div>
+</div>
+
+<!-- LEADERBOARD MODAL -->
+<div class="c-lb-overlay hidden" id="cLbOverlay" onclick="cCloseLbBackdrop(event)">
+  <div class="c-lb-modal">
+    <div class="c-lb-head">
+      <div class="c-lb-title">🏆 TOP 10 — HHT CHESS</div>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <button class="c-lb-refresh" onclick="cLoadLb()" title="Refresh">↻</button>
+        <button class="c-lb-close" onclick="cToggleLb()">✕</button>
+      </div>
+    </div>
+    <div class="c-lb-body" id="cLbBody"><div class="c-lb-loading">Loading...</div></div>
+  </div>
+</div>
   </div>
 </div>
 
@@ -910,6 +1095,15 @@ function updateStatus() {
 function setGameOver(msg) {
   gameOver = true;
   document.getElementById('status-text').textContent = msg;
+  // Determine result for leaderboard (only in AI mode)
+  if (gameMode === 'ai') {
+    let result = 'draw';
+    if (msg.includes('CHECKMATE')) {
+      const winner = msg.includes('White') ? WHITE : BLACK;
+      result = winner === playerColor ? 'win' : 'loss';
+    }
+    cSubmitScore(result);
+  }
   setTimeout(()=>showModal(msg), 600);
 }
 
@@ -1063,6 +1257,7 @@ function newGame() {
 function startGame() {
   document.getElementById('setup-screen').classList.add('hidden');
   document.getElementById('game-screen').classList.remove('hidden');
+  cGameStartTime = Date.now();
   initBoard();
   renderBoard();
   if(gameMode==='ai' && playerColor===BLACK) {
@@ -1099,8 +1294,203 @@ window.addEventListener('DOMContentLoaded', ()=>{
   selectDiff(2);
   document.getElementById('setup-screen').classList.remove('hidden');
   document.getElementById('game-screen').classList.add('hidden');
+  cInit();
 });
 
+// ══════════════════════════════════════════════
+// CHESS LEADERBOARD
+// ══════════════════════════════════════════════
+const C_SUPABASE_URL = 'https://sndnglmrpgdzwdilgapj.supabase.co';
+const C_SUPABASE_KEY = 'sb_publishable_WWwRrWf9BDpCAgcFVaQ5ow_fE3IDZU3';
+const C_TABLE = 'hht_chess_leaderboard';
+
+let cPlayer = null;
+let cLbVisible = false;
+let cConnectedWallet = null;
+let cGameStartTime = null;
+
+function cSbFetch(method, path, body) {
+  return fetch(C_SUPABASE_URL + '/rest/v1/' + path, {
+    method, headers: {
+      'apikey': C_SUPABASE_KEY, 'Authorization': 'Bearer ' + C_SUPABASE_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': method === 'POST' ? 'return=representation' : ''
+    },
+    body: body ? JSON.stringify(body) : undefined
+  }).then(r => r.json());
+}
+
+const C_WALLETS = {
+  phantom:  { name:'Phantom',     getProvider: ()=>(window.phantom?.solana)||(window.solana?.isPhantom?window.solana:null), installUrl:'https://phantom.app' },
+  solflare: { name:'Solflare',    getProvider: ()=>(window.solflare?.isSolflare?window.solflare:null), installUrl:'https://solflare.com' },
+  backpack: { name:'Backpack',    getProvider: ()=>(window.backpack?.isBackpack?window.backpack:(window.xnft?.solana||null)), installUrl:'https://backpack.app' },
+  trust:    { name:'Trust Wallet',getProvider: ()=>(window.trustwallet?.solana)||(window.solana?.isTrust?window.solana:null), installUrl:'https://trustwallet.com' }
+};
+
+function cShortenWallet(w) { return w && w.length>10 ? w.slice(0,4)+'...'+w.slice(-4) : w; }
+function cEsc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function cShowError(msg) { const el=document.getElementById('cRegError'); el.textContent=msg; el.style.display='block'; }
+function cHideError() { document.getElementById('cRegError').style.display='none'; }
+function cIsMobile() { return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent); }
+function cInPhantom() { return !!(window.phantom?.solana)||!!(window.solana?.isPhantom); }
+
+function cOpenPhantom() {
+  const cur = window.location.href;
+  const isLocal = cur.startsWith('file://') || !window.location.origin || window.location.origin==='null';
+  const ref = isLocal ? 'https://happyhousetoken.com' : window.location.origin;
+  const target = isLocal ? 'https://happyhousetoken.com/hht-chess.html' : cur;
+  window.location.href = 'https://phantom.app/ul/browse/'+encodeURIComponent(target)+'?ref='+encodeURIComponent(ref);
+}
+
+function cInitMobileCheck() {
+  if (!cIsMobile()) return;
+  if (cInPhantom()) { document.getElementById('cMobileBanner').classList.add('hidden'); return; }
+  document.getElementById('cMobileBanner').classList.remove('hidden');
+  document.getElementById('cWalletGrid').classList.add('hidden');
+}
+
+async function cConnectWallet(key) {
+  cHideError();
+  const def = C_WALLETS[key]; if (!def) return;
+  const provider = def.getProvider();
+  if (!provider) {
+    if (cIsMobile()) { document.getElementById('cMobileBanner').classList.remove('hidden'); document.getElementById('cWalletGrid').classList.add('hidden'); }
+    else cShowError(def.name + ' not found. Install from ' + def.installUrl);
+    return;
+  }
+  document.querySelectorAll('.c-wallet-btn').forEach(b=>b.disabled=true);
+  try {
+    const resp = await provider.connect();
+    cConnectedWallet = resp.publicKey.toString();
+    document.getElementById('cStepConnect').classList.add('hidden');
+    document.getElementById('cWalletConnected').classList.remove('hidden');
+    document.getElementById('cProviderName').textContent = def.name + ' Connected';
+    document.getElementById('cWalletDisplay').textContent = cShortenWallet(cConnectedWallet);
+    document.getElementById('cStepName').classList.remove('hidden');
+    document.getElementById('cRegSubmit').classList.remove('hidden');
+    setTimeout(()=>document.getElementById('cRegName').focus(), 100);
+  } catch(e) {
+    cShowError('Connection cancelled or failed.');
+    document.querySelectorAll('.c-wallet-btn').forEach(b=>b.disabled=false);
+  }
+}
+
+function cChangeWallet() {
+  cConnectedWallet = null;
+  document.getElementById('cWalletConnected').classList.add('hidden');
+  document.getElementById('cStepConnect').classList.remove('hidden');
+  document.getElementById('cStepName').classList.add('hidden');
+  document.getElementById('cRegSubmit').classList.add('hidden');
+  document.querySelectorAll('.c-wallet-btn').forEach(b=>b.disabled=false);
+  cHideError(); cInitMobileCheck();
+}
+
+async function cSubmitRegistration() {
+  cHideError();
+  const name = document.getElementById('cRegName').value.trim();
+  const wallet = cConnectedWallet;
+  if (!wallet) { cShowError('Please connect your wallet first.'); return; }
+  if (!name) { cShowError('Please enter your player name.'); return; }
+  if (name.length < 2) { cShowError('Name must be at least 2 characters.'); return; }
+  const btn = document.getElementById('cRegSubmit');
+  btn.disabled = true; btn.textContent = 'Saving...';
+  try {
+    cPlayer = { name, wallet };
+    localStorage.setItem('hhtChessPlayer', JSON.stringify(cPlayer));
+    cCloseOverlay();
+    cShowPlayerBar(cPlayer);
+  } catch(e) {
+    cShowError('Something went wrong. Try again.');
+    btn.disabled = false; btn.textContent = '🎮 Start Playing';
+  }
+}
+
+function cSkipRegistration() { cCloseOverlay(); }
+function cCloseOverlay() { document.getElementById('cRegOverlay').classList.add('hidden'); }
+
+function cShowPlayerBar(p) {
+  const bar = document.getElementById('c-player-bar');
+  bar.classList.add('visible');
+  document.getElementById('cPbAvatar').textContent = p.name.charAt(0).toUpperCase();
+  document.getElementById('cPbName').textContent = p.name;
+}
+
+function cToggleLb() {
+  const ov = document.getElementById('cLbOverlay');
+  cLbVisible = !cLbVisible;
+  if (cLbVisible) { ov.classList.remove('hidden'); cLoadLb(); }
+  else ov.classList.add('hidden');
+}
+
+function cCloseLbBackdrop(e) { if (e.target.id==='cLbOverlay') cToggleLb(); }
+
+function cFormatTime(secs) {
+  const m = Math.floor(secs/60), s = secs%60;
+  return m + 'm ' + String(s).padStart(2,'0') + 's';
+}
+
+async function cLoadLb() {
+  const body = document.getElementById('cLbBody');
+  body.innerHTML = '<div class="c-lb-loading">Loading...</div>';
+  try {
+    const rows = await cSbFetch('GET', C_TABLE+'?select=wallet,nickname,level,time_seconds,result&order=time_seconds.asc&limit=10&result=eq.win');
+    if (!Array.isArray(rows) || rows.length===0) {
+      // Try without filter
+      const all = await cSbFetch('GET', C_TABLE+'?select=wallet,nickname,level,time_seconds,result&order=time_seconds.asc&limit=10');
+      if (!Array.isArray(all) || all.length===0) { body.innerHTML='<div class="c-lb-loading">No scores yet — be the first! ♟</div>'; return; }
+      renderCLb(body, all); return;
+    }
+    renderCLb(body, rows);
+  } catch(e) { body.innerHTML='<div class="c-lb-loading">Could not load leaderboard.</div>'; }
+}
+
+function renderCLb(body, rows) {
+  const rankLabels=['🥇','🥈','🥉'], rankClasses=['gold','silver','bronze'];
+  const diffLabels = { Easy:'🟢 Easy', Medium:'🟡 Med', Hard:'🔴 Hard' };
+  body.innerHTML = rows.map((row,i)=>{
+    const isMe = cPlayer && row.wallet===cPlayer.wallet;
+    const rowCls = 'c-lb-row'+(isMe?' is-me':'');
+    const rankLbl = i<3?rankLabels[i]:(i+1);
+    const rankCls = i<3?rankClasses[i]:'';
+    const resultIcon = row.result==='win'?'✅':row.result==='draw'?'🤝':'❌';
+    return `<div class="${rowCls}">
+      <div class="c-lb-rank ${rankCls}">${rankLbl}</div>
+      <div class="c-lb-avatar">${(row.nickname||'?').charAt(0).toUpperCase()}</div>
+      <div class="c-lb-player">
+        <div class="c-lb-player-name">${cEsc(row.nickname)}${isMe?' 👈':''}</div>
+        <div class="c-lb-player-sub">${cShortenWallet(row.wallet)} · ${row.level||'Medium'} ${resultIcon}</div>
+      </div>
+      <div class="c-lb-score">${cFormatTime(row.time_seconds||0)}</div>
+    </div>`;
+  }).join('');
+}
+
+async function cSubmitScore(result) {
+  if (!cPlayer) return;
+  if (!cGameStartTime) return;
+  const timeSecs = Math.round((Date.now() - cGameStartTime) / 1000);
+  const diffLabels = {1:'Easy', 2:'Medium', 3:'Hard'};
+  const level = diffLabels[aiDepth] || 'Medium';
+  try {
+    await cSbFetch('POST', C_TABLE, {
+      wallet: cPlayer.wallet,
+      nickname: cPlayer.name,
+      level: level,
+      time_seconds: timeSecs,
+      result: result
+    });
+    if (cLbVisible) cLoadLb();
+  } catch(e) { /* silent */ }
+}
+
+function cInit() {
+  const saved = localStorage.getItem('hhtChessPlayer');
+  if (saved) {
+    try { cPlayer = JSON.parse(saved); cCloseOverlay(); cShowPlayerBar(cPlayer); }
+    catch(e) {}
+  }
+  cInitMobileCheck();
+}
 </script>
 
 </body>
