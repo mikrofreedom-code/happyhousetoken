@@ -8,9 +8,213 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: #000; display: flex; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
     canvas { display: block; touch-action: none; }
+
+    /* ── REGISTRATION OVERLAY ── */
+    .vr-overlay {
+      position:fixed; inset:0; z-index:200;
+      background:rgba(0,0,0,0.92); backdrop-filter:blur(6px);
+      display:flex; align-items:center; justify-content:center; padding:20px;
+      font-family: monospace;
+    }
+    .vr-overlay.hidden { display:none; }
+    .vr-modal {
+      background:#050510; border:2px solid #00ffc8;
+      border-radius:12px; padding:28px 24px;
+      width:100%; max-width:400px;
+      box-shadow:0 0 50px rgba(0,255,200,0.2);
+    }
+    .vr-modal h2 {
+      font-size:13px; color:#00ffc8;
+      text-shadow:0 0 14px rgba(0,255,200,0.6);
+      margin-bottom:8px; line-height:1.7; letter-spacing:2px; text-transform:uppercase;
+    }
+    .vr-modal p { font-size:12px; color:rgba(255,255,255,0.35); margin-bottom:20px; line-height:1.7; }
+    .vr-label { display:block; font-size:8px; letter-spacing:3px; color:rgba(0,255,200,0.6); margin-bottom:6px; text-transform:uppercase; }
+    .vr-input {
+      width:100%; background:#000; border:1px solid rgba(0,255,200,0.25);
+      border-radius:7px; padding:11px 14px; color:#fff;
+      font-size:14px; font-family:monospace; outline:none;
+      transition:border-color 0.15s; margin-bottom:14px;
+    }
+    .vr-input:focus { border-color:#00ffc8; box-shadow:0 0 14px rgba(0,255,200,0.2); }
+    .vr-input::placeholder { color:rgba(255,255,255,0.15); }
+    .vr-wallet-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px; }
+    .vr-wallet-btn {
+      display:flex; align-items:center; gap:8px;
+      background:#000; border:1.5px solid rgba(255,255,255,0.08);
+      border-radius:8px; padding:10px 12px; cursor:pointer;
+      color:#fff; font-family:monospace; font-size:12px;
+      transition:border-color 0.15s, background 0.15s;
+    }
+    .vr-wallet-btn:hover { border-color:rgba(0,255,200,0.45); background:rgba(0,255,200,0.07); }
+    .vr-wallet-btn:disabled { opacity:0.4; cursor:not-allowed; }
+    .vr-wallet-connected {
+      display:flex; align-items:center; gap:10px;
+      background:rgba(61,255,0,0.06); border:1px solid rgba(61,255,0,0.2);
+      border-radius:8px; padding:10px 14px; margin-bottom:14px;
+    }
+    .vr-wallet-check { width:28px; height:28px; background:#3dff00; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; color:#000; flex-shrink:0; }
+    .vr-wallet-change { margin-left:auto; background:none; border:1px solid rgba(255,255,255,0.1); border-radius:5px; color:rgba(255,255,255,0.4); font-size:11px; padding:4px 8px; cursor:pointer; font-family:monospace; }
+    .vr-reg-btn {
+      width:100%; padding:13px; border-radius:8px; border:none;
+      background:linear-gradient(135deg,#00ffc8,#00c8ff);
+      color:#000; font-family:monospace; font-size:13px; font-weight:bold;
+      letter-spacing:2px; cursor:pointer; text-transform:uppercase;
+      box-shadow:0 0 20px rgba(0,255,200,0.4); transition:box-shadow 0.15s; margin-top:4px;
+    }
+    .vr-reg-btn:hover { box-shadow:0 0 36px rgba(0,255,200,0.7); }
+    .vr-reg-btn:disabled { background:#111; color:rgba(255,255,255,0.2); cursor:not-allowed; box-shadow:none; }
+    .vr-skip-btn {
+      width:100%; background:transparent; color:rgba(255,255,255,0.3);
+      border:1px solid rgba(255,255,255,0.1); border-radius:8px;
+      padding:11px; font-family:monospace; font-size:12px;
+      cursor:pointer; margin-top:8px; transition:border-color 0.15s, color 0.15s;
+    }
+    .vr-skip-btn:hover { border-color:rgba(0,255,200,0.3); color:rgba(0,255,200,0.7); }
+    .vr-reg-error {
+      background:rgba(255,50,50,0.1); border:1px solid rgba(255,50,50,0.3);
+      color:#ff8080; border-radius:7px; padding:10px 14px;
+      font-size:12px; margin-top:10px; display:none; font-family:monospace;
+    }
+    .vr-mpb {
+      display:flex; align-items:center; gap:10px;
+      background:rgba(171,159,242,0.08); border:1.5px solid rgba(171,159,242,0.2);
+      border-radius:8px; padding:12px; margin-bottom:12px;
+    }
+    .vr-mpb-open { background:#ab9ff2; color:#111; border:none; border-radius:6px; padding:7px 12px; font-size:12px; font-weight:bold; cursor:pointer; flex-shrink:0; font-family:monospace; }
+
+    /* ── PLAYER BAR ── */
+    #vr-player-bar {
+      position:fixed; top:10px; left:50%; transform:translateX(-50%);
+      z-index:100; display:none; align-items:center; gap:8px;
+      background:rgba(0,0,0,0.7); border:1px solid rgba(0,255,200,0.25);
+      border-radius:20px; padding:5px 14px 5px 10px;
+      font-family:monospace; backdrop-filter:blur(4px);
+    }
+    #vr-player-bar.visible { display:flex; }
+    .vr-pb-avatar { width:24px; height:24px; background:#00ffc8; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:bold; color:#000; flex-shrink:0; }
+    .vr-pb-name { font-size:11px; color:#fff; letter-spacing:1px; }
+    .vr-pb-lb-btn {
+      background:rgba(0,255,200,0.08); border:1px solid rgba(0,255,200,0.25);
+      color:#00ffc8; border-radius:10px; padding:4px 10px;
+      font-family:monospace; font-size:10px; letter-spacing:1px;
+      cursor:pointer; transition:all 0.15s;
+    }
+    .vr-pb-lb-btn:hover { background:rgba(0,255,200,0.18); }
+
+    /* ── LB BUTTON (always visible) ── */
+    #vr-lb-fixed {
+      position:fixed; top:10px; right:10px; z-index:100;
+      background:rgba(0,0,0,0.7); border:1px solid rgba(0,255,200,0.25);
+      border-radius:20px; padding:6px 14px;
+      font-family:monospace; font-size:11px; color:#00ffc8;
+      cursor:pointer; letter-spacing:1px;
+      transition:background 0.15s;
+    }
+    #vr-lb-fixed:hover { background:rgba(0,255,200,0.12); }
+
+    /* ── LEADERBOARD MODAL ── */
+    .vr-lb-overlay {
+      position:fixed; inset:0; z-index:300;
+      background:rgba(0,0,0,0.9); backdrop-filter:blur(6px);
+      display:flex; align-items:center; justify-content:center; padding:20px;
+    }
+    .vr-lb-overlay.hidden { display:none; }
+    .vr-lb-modal {
+      background:#050510; border:2px solid #00ffc8;
+      border-radius:12px; overflow:hidden;
+      width:100%; max-width:420px; max-height:85vh; overflow-y:auto;
+      box-shadow:0 0 50px rgba(0,255,200,0.2);
+    }
+    .vr-lb-head { display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border-bottom:1px solid rgba(0,255,200,0.12); }
+    .vr-lb-title { font-family:monospace; font-size:11px; color:#00ffc8; text-shadow:0 0 10px rgba(0,255,200,0.5); letter-spacing:2px; text-transform:uppercase; }
+    .vr-lb-close { background:none; border:none; color:rgba(255,255,255,0.3); cursor:pointer; font-size:18px; padding:4px 8px; transition:color 0.15s; }
+    .vr-lb-close:hover { color:#fff; }
+    .vr-lb-refresh { background:none; border:none; color:rgba(255,255,255,0.3); cursor:pointer; font-size:14px; padding:4px; transition:color 0.15s; }
+    .vr-lb-refresh:hover { color:#00ffc8; }
+    .vr-lb-body { padding:6px 0; min-height:60px; }
+    .vr-lb-loading { text-align:center; padding:20px; color:rgba(255,255,255,0.3); font-size:12px; font-family:monospace; }
+    .vr-lb-row { display:flex; align-items:center; padding:9px 16px; gap:10px; border-bottom:1px solid rgba(0,255,200,0.05); transition:background 0.1s; }
+    .vr-lb-row:hover { background:rgba(0,255,200,0.04); }
+    .vr-lb-row.is-me { background:rgba(0,255,200,0.06); border-left:2px solid #00ffc8; }
+    .vr-lb-rank { width:24px; text-align:center; font-family:monospace; font-size:10px; color:rgba(255,255,255,0.3); flex-shrink:0; }
+    .vr-lb-rank.gold { color:#ffd700; text-shadow:0 0 8px #ffd700; }
+    .vr-lb-rank.silver { color:#b0b8c8; }
+    .vr-lb-rank.bronze { color:#cd7f32; }
+    .vr-lb-avatar { width:28px; height:28px; border-radius:50%; background:#000; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:bold; color:#00ffc8; flex-shrink:0; border:1px solid rgba(0,255,200,0.2); }
+    .vr-lb-player { flex:1; min-width:0; }
+    .vr-lb-player-name { font-size:13px; font-weight:bold; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-family:monospace; }
+    .vr-lb-player-wallet { font-size:10px; color:rgba(255,255,255,0.3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-family:monospace; }
+    .vr-lb-score { font-family:monospace; font-size:14px; font-weight:bold; color:#00ffc8; text-shadow:0 0 8px rgba(0,255,200,0.5); flex-shrink:0; }
+    .hidden { display:none !important; }
   </style>
 </head>
 <body>
+
+<!-- REGISTRATION OVERLAY -->
+<div class="vr-overlay" id="vrRegOverlay">
+  <div class="vr-modal">
+    <div style="font-size:32px;margin-bottom:12px;">🚀</div>
+    <h2>Join the Leaderboard</h2>
+    <p>Connect your Solana wallet and enter a name to track your score on the Void Runner leaderboard.</p>
+    <div id="vrStepConnect">
+      <div id="vrMobileBanner" class="vr-mpb hidden">
+        <div style="font-size:24px;">👻</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13px;font-weight:bold;color:#fff;margin-bottom:3px;">Open in Phantom Browser</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.35);">Tap below to open inside the Phantom app</div>
+        </div>
+        <button class="vr-mpb-open" onclick="vrOpenPhantom()">Open →</button>
+      </div>
+      <div class="vr-wallet-grid" id="vrWalletGrid">
+        <button class="vr-wallet-btn" onclick="vrConnectWallet('phantom')"><div style="width:28px;height:28px;background:#ab9ff2;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;">👻</div><div><div>Phantom</div><div style="font-size:10px;color:rgba(255,255,255,0.35);">Most popular</div></div></button>
+        <button class="vr-wallet-btn" onclick="vrConnectWallet('solflare')"><div style="width:28px;height:28px;background:#fc7227;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;">🔆</div><div><div>Solflare</div><div style="font-size:10px;color:rgba(255,255,255,0.35);">solflare.com</div></div></button>
+        <button class="vr-wallet-btn" onclick="vrConnectWallet('backpack')"><div style="width:28px;height:28px;background:#e33e3f;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;">🎒</div><div><div>Backpack</div><div style="font-size:10px;color:rgba(255,255,255,0.35);">backpack.app</div></div></button>
+        <button class="vr-wallet-btn" onclick="vrConnectWallet('trust')"><div style="width:28px;height:28px;background:#3375bb;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;">🛡️</div><div><div>Trust Wallet</div><div style="font-size:10px;color:rgba(255,255,255,0.35);">Mobile</div></div></button>
+      </div>
+    </div>
+    <div class="vr-wallet-connected hidden" id="vrWalletConnected">
+      <div class="vr-wallet-check">✓</div>
+      <div>
+        <div style="font-weight:bold;font-size:13px;color:#fff;" id="vrProviderName">Wallet</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.35);" id="vrWalletDisplay">—</div>
+      </div>
+      <button class="vr-wallet-change" onclick="vrChangeWallet()">Change</button>
+    </div>
+    <div id="vrStepName" class="hidden">
+      <label class="vr-label">Player Name</label>
+      <input type="text" class="vr-input" id="vrRegName" placeholder="e.g. VoidPilot" maxlength="30" autocomplete="off" onkeydown="event.stopPropagation()" onkeyup="event.stopPropagation()">
+    </div>
+    <button class="vr-reg-btn hidden" id="vrRegSubmit" onclick="vrSubmitRegistration()">▶ Launch</button>
+    <button class="vr-skip-btn" onclick="vrSkipRegistration()">Play without leaderboard</button>
+    <div class="vr-reg-error" id="vrRegError"></div>
+  </div>
+</div>
+
+<!-- PLAYER BAR -->
+<div id="vr-player-bar">
+  <div class="vr-pb-avatar" id="vrPbAvatar">?</div>
+  <div class="vr-pb-name" id="vrPbName">—</div>
+  <button class="vr-pb-lb-btn" onclick="vrToggleLb()">🏆 LB</button>
+</div>
+
+<!-- LB FIXED BUTTON (always visible) -->
+<button id="vr-lb-fixed" onclick="vrToggleLb()">🏆 LEADERBOARD</button>
+
+<!-- LEADERBOARD MODAL -->
+<div class="vr-lb-overlay hidden" id="vrLbOverlay" onclick="vrCloseLbBackdrop(event)">
+  <div class="vr-lb-modal">
+    <div class="vr-lb-head">
+      <div class="vr-lb-title">🏆 Top 10 — Void Runner</div>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <button class="vr-lb-refresh" onclick="vrLoadLb()" title="Refresh">↻</button>
+        <button class="vr-lb-close" onclick="vrToggleLb()">✕</button>
+      </div>
+    </div>
+    <div class="vr-lb-body" id="vrLbBody"><div class="vr-lb-loading">Loading...</div></div>
+  </div>
+</div>
+
 <canvas id="c"></canvas>
 <script>
 
@@ -267,6 +471,7 @@ function die() {
   spawnExplosion(ship.x, ship.y);
   shake = 18;
   mode  = MODE_DEAD;
+  if (score > 0) vrSubmitScore(score);
   setTimeout(() => { mode = MODE_MENU; }, DEAD_DELAY);
 }
 
@@ -613,6 +818,179 @@ function frame() {
 
 frame();
 
+// ══════════════════════════════════════════════
+// VOID RUNNER LEADERBOARD
+// ══════════════════════════════════════════════
+const VR_URL = 'https://sndnglmrpgdzwdilgapj.supabase.co';
+const VR_KEY = 'sb_publishable_WWwRrWf9BDpCAgcFVaQ5ow_fE3IDZU3';
+const VR_TABLE = 'hht_voidrunner_leaderboard';
+
+let vrPlayer = null;
+let vrLbVisible = false;
+let vrConnectedWallet = null;
+
+function vrSbFetch(method, path, body) {
+  return fetch(VR_URL + '/rest/v1/' + path, {
+    method, headers: {
+      'apikey': VR_KEY, 'Authorization': 'Bearer ' + VR_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': method === 'POST' ? 'return=representation' : ''
+    },
+    body: body ? JSON.stringify(body) : undefined
+  }).then(r => r.json());
+}
+
+const VR_WALLETS = {
+  phantom:  { name:'Phantom',     getProvider: ()=>(window.phantom?.solana)||(window.solana?.isPhantom?window.solana:null), installUrl:'https://phantom.app' },
+  solflare: { name:'Solflare',    getProvider: ()=>(window.solflare?.isSolflare?window.solflare:null), installUrl:'https://solflare.com' },
+  backpack: { name:'Backpack',    getProvider: ()=>(window.backpack?.isBackpack?window.backpack:(window.xnft?.solana||null)), installUrl:'https://backpack.app' },
+  trust:    { name:'Trust Wallet',getProvider: ()=>(window.trustwallet?.solana)||(window.solana?.isTrust?window.solana:null), installUrl:'https://trustwallet.com' }
+};
+
+function vrShortenWallet(w) { return w && w.length>10 ? w.slice(0,4)+'...'+w.slice(-4) : w; }
+function vrEsc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function vrShowError(msg) { const el=document.getElementById('vrRegError'); el.textContent=msg; el.style.display='block'; }
+function vrHideError() { document.getElementById('vrRegError').style.display='none'; }
+function vrIsMobile() { return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent); }
+function vrInPhantom() { return !!(window.phantom?.solana)||!!(window.solana?.isPhantom); }
+
+function vrOpenPhantom() {
+  const cur = window.location.href;
+  const isLocal = cur.startsWith('file://') || !window.location.origin || window.location.origin==='null';
+  const ref = isLocal ? 'https://happyhousetoken.com' : window.location.origin;
+  const target = isLocal ? 'https://happyhousetoken.com/VoidRunner.html' : cur;
+  window.location.href = 'https://phantom.app/ul/browse/'+encodeURIComponent(target)+'?ref='+encodeURIComponent(ref);
+}
+
+function vrInitMobileCheck() {
+  if (!vrIsMobile()) return;
+  if (vrInPhantom()) { document.getElementById('vrMobileBanner').classList.add('hidden'); return; }
+  document.getElementById('vrMobileBanner').classList.remove('hidden');
+  document.getElementById('vrWalletGrid').classList.add('hidden');
+}
+
+async function vrConnectWallet(key) {
+  vrHideError();
+  const def = VR_WALLETS[key]; if (!def) return;
+  const provider = def.getProvider();
+  if (!provider) {
+    if (vrIsMobile()) { document.getElementById('vrMobileBanner').classList.remove('hidden'); document.getElementById('vrWalletGrid').classList.add('hidden'); }
+    else vrShowError(def.name + ' not found. Install from ' + def.installUrl);
+    return;
+  }
+  document.querySelectorAll('.vr-wallet-btn').forEach(b=>b.disabled=true);
+  try {
+    const resp = await provider.connect();
+    vrConnectedWallet = resp.publicKey.toString();
+    document.getElementById('vrStepConnect').classList.add('hidden');
+    document.getElementById('vrWalletConnected').classList.remove('hidden');
+    document.getElementById('vrProviderName').textContent = def.name + ' Connected';
+    document.getElementById('vrWalletDisplay').textContent = vrShortenWallet(vrConnectedWallet);
+    document.getElementById('vrStepName').classList.remove('hidden');
+    document.getElementById('vrRegSubmit').classList.remove('hidden');
+    setTimeout(()=>document.getElementById('vrRegName').focus(), 100);
+  } catch(e) {
+    vrShowError('Connection cancelled or failed.');
+    document.querySelectorAll('.vr-wallet-btn').forEach(b=>b.disabled=false);
+  }
+}
+
+function vrChangeWallet() {
+  vrConnectedWallet = null;
+  document.getElementById('vrWalletConnected').classList.add('hidden');
+  document.getElementById('vrStepConnect').classList.remove('hidden');
+  document.getElementById('vrStepName').classList.add('hidden');
+  document.getElementById('vrRegSubmit').classList.add('hidden');
+  document.querySelectorAll('.vr-wallet-btn').forEach(b=>b.disabled=false);
+  vrHideError(); vrInitMobileCheck();
+}
+
+async function vrSubmitRegistration() {
+  vrHideError();
+  const name = document.getElementById('vrRegName').value.trim();
+  const wallet = vrConnectedWallet;
+  if (!wallet) { vrShowError('Please connect your wallet first.'); return; }
+  if (!name) { vrShowError('Please enter your player name.'); return; }
+  if (name.length < 2) { vrShowError('Name must be at least 2 characters.'); return; }
+  const btn = document.getElementById('vrRegSubmit');
+  btn.disabled = true; btn.textContent = 'Saving...';
+  try {
+    vrPlayer = { name, wallet };
+    localStorage.setItem('hhtVoidRunnerPlayer', JSON.stringify(vrPlayer));
+    vrCloseOverlay();
+    vrShowPlayerBar(vrPlayer);
+  } catch(e) {
+    vrShowError('Something went wrong. Try again.');
+    btn.disabled = false; btn.textContent = '▶ Launch';
+  }
+}
+
+function vrSkipRegistration() { vrCloseOverlay(); }
+function vrCloseOverlay() { document.getElementById('vrRegOverlay').classList.add('hidden'); }
+
+function vrShowPlayerBar(p) {
+  const bar = document.getElementById('vr-player-bar');
+  bar.classList.add('visible');
+  document.getElementById('vrPbAvatar').textContent = p.name.charAt(0).toUpperCase();
+  document.getElementById('vrPbName').textContent = p.name;
+  document.getElementById('vr-lb-fixed').style.display = 'none';
+}
+
+function vrToggleLb() {
+  const ov = document.getElementById('vrLbOverlay');
+  vrLbVisible = !vrLbVisible;
+  if (vrLbVisible) { ov.classList.remove('hidden'); vrLoadLb(); }
+  else ov.classList.add('hidden');
+}
+
+function vrCloseLbBackdrop(e) { if (e.target.id==='vrLbOverlay') vrToggleLb(); }
+
+async function vrLoadLb() {
+  const body = document.getElementById('vrLbBody');
+  body.innerHTML = '<div class="vr-lb-loading">Loading...</div>';
+  try {
+    const rows = await vrSbFetch('GET', VR_TABLE+'?select=wallet,nickname,score&order=score.desc&limit=10');
+    if (!Array.isArray(rows) || rows.length===0) { body.innerHTML='<div class="vr-lb-loading">No scores yet — be the first! 🚀</div>'; return; }
+    const rankLabels=['🥇','🥈','🥉'], rankClasses=['gold','silver','bronze'];
+    body.innerHTML = rows.map((row,i)=>{
+      const isMe = vrPlayer && row.wallet===vrPlayer.wallet;
+      const rowCls = 'vr-lb-row'+(isMe?' is-me':'');
+      const rankLbl = i<3?rankLabels[i]:(i+1);
+      const rankCls = i<3?rankClasses[i]:'';
+      return `<div class="${rowCls}">
+        <div class="vr-lb-rank ${rankCls}">${rankLbl}</div>
+        <div class="vr-lb-avatar">${(row.nickname||'?').charAt(0).toUpperCase()}</div>
+        <div class="vr-lb-player">
+          <div class="vr-lb-player-name">${vrEsc(row.nickname)}${isMe?' 👈':''}</div>
+          <div class="vr-lb-player-wallet">${vrShortenWallet(row.wallet)}</div>
+        </div>
+        <div class="vr-lb-score">${row.score}</div>
+      </div>`;
+    }).join('');
+  } catch(e) { body.innerHTML='<div class="vr-lb-loading">Could not load leaderboard.</div>'; }
+}
+
+async function vrSubmitScore(finalScore) {
+  if (!vrPlayer || finalScore <= 0) return;
+  try {
+    await vrSbFetch('POST', VR_TABLE, {
+      wallet: vrPlayer.wallet,
+      nickname: vrPlayer.name,
+      score: finalScore
+    });
+    if (vrLbVisible) vrLoadLb();
+  } catch(e) { /* silent */ }
+}
+
+// Init
+(function vrInit() {
+  const saved = localStorage.getItem('hhtVoidRunnerPlayer');
+  if (saved) {
+    try { vrPlayer = JSON.parse(saved); vrCloseOverlay(); vrShowPlayerBar(vrPlayer); }
+    catch(e) {}
+  }
+  vrInitMobileCheck();
+})();
 </script>
 </body>
 </html>

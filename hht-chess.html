@@ -472,7 +472,7 @@ body {
     </div>
     <div id="cStepName" class="hidden">
       <label class="c-label">Player Name</label>
-      <input type="text" class="c-input" id="cRegName" placeholder="e.g. ChessMaster" maxlength="30" autocomplete="off">
+      <input type="text" class="c-input" id="cRegName" placeholder="e.g. ChessMaster" maxlength="30" autocomplete="off" onkeydown="event.stopPropagation()" onkeyup="event.stopPropagation()">
     </div>
     <button class="c-reg-btn hidden" id="cRegSubmit" onclick="cSubmitRegistration()">🎮 Start Playing</button>
     <button class="c-skip-btn" onclick="cSkipRegistration()">Play without leaderboard</button>
@@ -1433,12 +1433,9 @@ async function cLoadLb() {
   const body = document.getElementById('cLbBody');
   body.innerHTML = '<div class="c-lb-loading">Loading...</div>';
   try {
-    const rows = await cSbFetch('GET', C_TABLE+'?select=wallet,nickname,level,time_seconds,result&order=time_seconds.asc&limit=10&result=eq.win');
+    const rows = await cSbFetch('GET', C_TABLE+'?select=wallet,nickname,level,time_seconds,result&result=eq.win&order=time_seconds.asc&limit=10');
     if (!Array.isArray(rows) || rows.length===0) {
-      // Try without filter
-      const all = await cSbFetch('GET', C_TABLE+'?select=wallet,nickname,level,time_seconds,result&order=time_seconds.asc&limit=10');
-      if (!Array.isArray(all) || all.length===0) { body.innerHTML='<div class="c-lb-loading">No scores yet — be the first! ♟</div>'; return; }
-      renderCLb(body, all); return;
+      body.innerHTML='<div class="c-lb-loading">No wins yet — be the first! ♟</div>'; return;
     }
     renderCLb(body, rows);
   } catch(e) { body.innerHTML='<div class="c-lb-loading">Could not load leaderboard.</div>'; }
