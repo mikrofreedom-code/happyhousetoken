@@ -263,7 +263,7 @@ canvas { display:block; position:absolute; top:0; left:0; }
     </div>
     <div id="wStepName" class="hidden">
       <label class="reg-label">Player Name</label>
-      <input type="text" class="reg-input" id="wRegName" placeholder="e.g. WormKing" maxlength="30" autocomplete="off">
+      <input type="text" class="reg-input" id="wRegName" placeholder="e.g. WormKing" maxlength="30" autocomplete="off" onkeydown="event.stopPropagation()" onkeyup="event.stopPropagation()">
     </div>
     <button class="reg-btn hidden" id="wRegSubmit" onclick="wSubmitRegistration()">🎮 Start Playing</button>
     <button class="skip-btn-w" onclick="wSkipRegistration()">Play without leaderboard</button>
@@ -322,6 +322,7 @@ canvas { display:block; position:absolute; top:0; left:0; }
 </div>
 <div id="ingame-btns" style="position:fixed;top:78px;left:50%;transform:translateX(-50%);z-index:50;display:none;gap:8px;flex-direction:row;">
   <button onclick="startGame()" style="padding:7px 16px;border-radius:20px;border:1px solid rgba(255,255,255,0.2);background:rgba(0,0,0,0.5);color:#fff;font-family:Fredoka One,cursive;font-size:14px;cursor:pointer;">&#x21BA; Reset</button>
+  <button onclick="wToggleLb()" style="padding:7px 16px;border-radius:20px;border:1px solid rgba(255,215,0,0.3);background:rgba(0,0,0,0.5);color:#FFD700;font-family:Fredoka One,cursive;font-size:14px;cursor:pointer;">🏆 LB</button>
 </div>
 
 <div id="joy-zone">
