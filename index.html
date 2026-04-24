@@ -1595,5 +1595,12 @@ function copyAddress() {
   setInterval(loadHeroNews, 5 * 60 * 1000);
 })();
 </script>
+
+<!-- SENTINEL WIDGET -->
+<script>
+fetch("/sentinel-widget.html")
+  .then(r => r.text())
+  .then(html => document.body.insertAdjacentHTML("beforeend", html));
+</script>
 </body>
 </html>

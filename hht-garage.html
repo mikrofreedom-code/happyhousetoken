@@ -360,5 +360,12 @@ footer {
 
 <footer>$HHT • SOLANA • 2026 • THE HAPPYHOUSE</footer>
 
+
+<!-- SENTINEL WIDGET -->
+<script>
+fetch("/sentinel-widget.html")
+  .then(r => r.text())
+  .then(html => document.body.insertAdjacentHTML("beforeend", html));
+</script>
 </body>
 </html>

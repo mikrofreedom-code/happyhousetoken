@@ -1215,5 +1215,12 @@
     document.getElementById('vip-content').classList.remove('visible');
   });
 </script>
+
+<!-- SENTINEL WIDGET -->
+<script>
+fetch("/sentinel-widget.html")
+  .then(r => r.text())
+  .then(html => document.body.insertAdjacentHTML("beforeend", html));
+</script>
 </body>
 </html>

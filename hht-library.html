@@ -675,5 +675,12 @@
     },{threshold:0.5});
     io.observe(document.querySelector('.stats'));
   </script>
+
+<!-- SENTINEL WIDGET -->
+<script>
+fetch("/sentinel-widget.html")
+  .then(r => r.text())
+  .then(html => document.body.insertAdjacentHTML("beforeend", html));
+</script>
 </body>
 </html>

@@ -704,5 +704,12 @@ footer { text-align:center;padding:22px 24px;border-top:1px solid rgba(255,120,0
 
 
 
+
+<!-- SENTINEL WIDGET -->
+<script>
+fetch("/sentinel-widget.html")
+  .then(r => r.text())
+  .then(html => document.body.insertAdjacentHTML("beforeend", html));
+</script>
 </body>
 </html>
