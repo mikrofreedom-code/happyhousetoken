@@ -829,47 +829,6 @@ footer {
   color: rgba(255,255,255,0.2); padding: 24px;
 }
 
-/* ===== JUPITER BUTTON ===== */
-#jup-float {
-  position: fixed;
-  bottom: 28px;
-  right: 28px;
-  z-index: 9500;
-}
-#jup-float a {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: linear-gradient(135deg, #00f0ff, #ff1aaa);
-  padding: 12px 20px;
-  border-radius: 50px;
-  text-decoration: none;
-  box-shadow: 0 0 20px rgba(0,240,255,0.4), 0 0 40px rgba(0,240,255,0.2);
-  animation: jup-pulse 2s ease-in-out infinite;
-  transition: transform 0.2s;
-}
-#jup-float a:hover { transform: scale(1.06); }
-@keyframes jup-pulse {
-  0%,100% { box-shadow: 0 0 20px rgba(0,240,255,0.4), 0 0 40px rgba(0,240,255,0.2); }
-  50%      { box-shadow: 0 0 35px rgba(255,26,170,0.7), 0 0 60px rgba(255,26,170,0.3); }
-}
-#jup-float img {
-  width: 24px; height: 24px; border-radius: 50%;
-}
-#jup-float span {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: #000;
-  letter-spacing: 1px;
-  white-space: nowrap;
-}
-@media (max-width: 768px) {
-  #jup-float { bottom: 20px; right: 16px; }
-  #jup-float a { padding: 10px 16px; gap: 8px; }
-  #jup-float span { font-size: 0.7rem; }
-}
-
 </style>
 </head>
 <body>
@@ -1540,13 +1499,7 @@ function copyAddress() {
 })();
 </script>
 
-<!-- JUPITER SWAP BUTTON -->
-<div id="jup-float">
-  <a href="https://jup.ag/swap/SOL-4KrNyA5FpFGQj4jQZh1yKzBkobq7mGVftWYVWjfwpump" target="_blank" rel="noopener">
-    <img src="https://jup.ag/svg/jupiter-logo.svg" alt="Jupiter" onerror="this.style.display='none'">
-    <span>⚡ Swap on Jupiter</span>
-  </a>
-</div>
+
 
 
 <script>
@@ -1594,29 +1547,6 @@ function copyAddress() {
   loadHeroNews();
   setInterval(loadHeroNews, 5 * 60 * 1000);
 })();
-</script>
-
-<!-- SENTINEL WIDGET -->
-<script>
-fetch("/sentinel-widget.html")
-  .then(r => r.text())
-  .then(html => {
-    const div = document.createElement('div');
-    div.innerHTML = html;
-    Array.from(div.childNodes).forEach(node => {
-      if (node.nodeName !== 'SCRIPT' && node.nodeName !== 'LINK') document.body.appendChild(node);
-    });
-    Array.from(div.querySelectorAll('link')).forEach(el => {
-      const link = document.createElement('link');
-      link.rel = el.rel; link.href = el.href;
-      document.head.appendChild(link);
-    });
-    Array.from(div.querySelectorAll('script')).forEach(old => {
-      const s = document.createElement('script');
-      s.textContent = old.textContent;
-      document.body.appendChild(s);
-    });
-  });
 </script>
 </body>
 </html>
