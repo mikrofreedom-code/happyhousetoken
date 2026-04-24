@@ -1,0 +1,431 @@
+<!-- ============================================
+     SENTINEL FLOATING WIDGET v1.0
+     Autor: HHT Arena
+     ============================================ -->
+
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+<style>
+#sentinel-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  background: rgba(5,9,15,0.95);
+  border: 2px solid rgba(255,140,0,0.6);
+  cursor: pointer;
+  z-index: 9998;
+  padding: 0;
+  box-shadow: 0 0 18px rgba(255,140,0,0.35), 0 4px 20px rgba(0,0,0,0.5);
+  transition: all 0.25s ease;
+  overflow: hidden;
+}
+#sentinel-btn:hover {
+  transform: scale(1.08);
+  border-color: rgba(255,140,0,0.9);
+  box-shadow: 0 0 28px rgba(255,140,0,0.55), 0 4px 24px rgba(0,0,0,0.6);
+}
+#sentinel-btn img {
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: top center;
+}
+#sentinel-btn .s-pulse {
+  position: absolute; inset: -4px; border-radius: 50%;
+  border: 2px solid rgba(255,140,0,0.3);
+  animation: sPulse 2s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes sPulse {
+  0%,100%{transform:scale(1);opacity:0.3}
+  50%{transform:scale(1.12);opacity:0.8}
+}
+
+#sentinel-tip {
+  position: fixed;
+  bottom: 96px; right: 24px;
+  background: rgba(5,9,15,0.95);
+  border: 1px solid rgba(255,140,0,0.4);
+  color: rgba(255,140,0,0.9);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px; padding: 6px 12px;
+  border-radius: 4px; white-space: nowrap;
+  z-index: 9997; pointer-events: none;
+  opacity: 0; transform: translateY(6px);
+  transition: all 0.2s ease;
+}
+#sentinel-tip.show { opacity: 1; transform: translateY(0); }
+
+#sentinel-chat {
+  position: fixed;
+  bottom: 100px; right: 24px;
+  width: 400px; max-width: calc(100vw - 32px);
+  background: #05090f;
+  border: 1px solid rgba(255,140,0,0.3);
+  border-radius: 6px;
+  z-index: 9999;
+  display: none;
+  flex-direction: column;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.7), 0 0 30px rgba(255,140,0,0.1);
+  overflow: hidden;
+}
+#sentinel-chat.open {
+  display: flex;
+  animation: sSlideIn 0.25s ease;
+}
+@keyframes sSlideIn {
+  from{opacity:0;transform:translateY(12px) scale(0.97)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+#sentinel-chat::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(0,240,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,240,255,0.02) 1px, transparent 1px);
+  background-size: 30px 30px;
+  pointer-events: none; z-index: 0;
+}
+
+.s-head {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, rgba(255,140,0,0.08), rgba(0,240,255,0.03));
+  border-bottom: 1px solid rgba(255,140,0,0.2);
+  position: relative; z-index: 1; flex-shrink: 0;
+}
+.s-head::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,140,0,0.7), rgba(0,240,255,0.5), transparent);
+}
+.s-av {
+  width: 46px; height: 46px; border-radius: 4px;
+  overflow: hidden; border: 1px solid rgba(255,140,0,0.4);
+  flex-shrink: 0; filter: drop-shadow(0 0 8px rgba(255,140,0,0.4));
+}
+.s-av img { width:100%; height:100%; object-fit:cover; object-position:top; }
+.s-info { flex: 1; }
+.s-name {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px; color: #ff8c00;
+  text-shadow: 0 0 12px rgba(255,140,0,0.8);
+  letter-spacing: 1px; margin-bottom: 4px;
+}
+.s-role { font-family:'Share Tech Mono',monospace; font-size:9px; color:rgba(0,240,255,0.45); letter-spacing:0.5px; margin-bottom:5px; }
+.s-status { display:flex; align-items:center; gap:6px; }
+.s-dot { width:6px;height:6px;border-radius:50%;background:#00ff88;box-shadow:0 0 6px #00ff88;animation:sBlink 1.8s ease-in-out infinite; }
+@keyframes sBlink{0%,100%{opacity:1}50%{opacity:0.2}}
+.s-stxt { font-family:'Share Tech Mono',monospace; font-size:9px; color:#00ff88; }
+.s-close {
+  background:none; border:none; color:rgba(0,240,255,0.4);
+  font-size:16px; cursor:pointer; padding:4px 6px;
+  transition:color 0.2s; line-height:1;
+}
+.s-close:hover { color:rgba(0,240,255,0.9); }
+
+.s-msgs {
+  height: 300px; overflow-y: auto;
+  padding: 14px; display: flex; flex-direction: column; gap: 12px;
+  position: relative; z-index: 1;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,140,0,0.2) transparent;
+}
+.s-msgs::-webkit-scrollbar{width:3px;}
+.s-msgs::-webkit-scrollbar-thumb{background:rgba(255,140,0,0.2);}
+
+.s-msg { display:flex; gap:8px; animation:sFadeUp 0.3s ease; }
+.s-msg.user { flex-direction:row-reverse; }
+@keyframes sFadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+.s-mav {
+  width:24px; height:24px; border-radius:3px;
+  flex-shrink:0; display:flex; align-items:center; justify-content:center;
+  overflow:hidden;
+}
+.s-mav.s { border:1px solid rgba(255,140,0,0.3); }
+.s-mav.s img { width:100%;height:100%;object-fit:cover;object-position:top; }
+.s-mav.u {
+  background:rgba(255,233,0,0.08); border:1px solid rgba(255,233,0,0.25);
+  font-family:'Press Start 2P',monospace; font-size:5px; color:#ffe900;
+}
+
+.s-bbl {
+  max-width: 85%; padding: 9px 12px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px; line-height: 1.6;
+}
+.s-msg.sentinel .s-bbl {
+  background: rgba(255,140,0,0.05);
+  border: 1px solid rgba(255,140,0,0.15);
+  border-left: 2px solid rgba(255,140,0,0.5);
+  color: #d0e8f8; border-radius: 0 5px 5px 5px;
+}
+.s-tag {
+  font-family:'Press Start 2P',monospace;
+  font-size:6px; color:#ff8c00;
+  margin-bottom:4px; letter-spacing:0.5px; opacity:0.8;
+}
+.s-msg.user .s-bbl {
+  background: rgba(255,233,0,0.06);
+  border: 1px solid rgba(255,233,0,0.18);
+  border-right: 2px solid rgba(255,233,0,0.4);
+  color: #e8d870; border-radius: 5px 0 5px 5px; text-align:right;
+}
+
+.s-typing {
+  background: rgba(255,140,0,0.05);
+  border: 1px solid rgba(255,140,0,0.15);
+  border-left: 2px solid rgba(255,140,0,0.5);
+  border-radius: 0 5px 5px 5px;
+  padding: 10px 13px; display:flex; gap:4px; align-items:center;
+}
+.s-typing span {
+  width:4px;height:4px;border-radius:50%;
+  background:#ff8c00;opacity:0.3;
+  animation:sTyp 1.2s ease-in-out infinite;
+}
+.s-typing span:nth-child(2){animation-delay:0.2s}
+.s-typing span:nth-child(3){animation-delay:0.4s}
+@keyframes sTyp{0%,60%,100%{opacity:0.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
+
+.s-quick {
+  display:flex; flex-wrap:wrap; gap:5px;
+  padding:10px 14px;
+  border-top:1px solid rgba(0,240,255,0.08);
+  background: rgba(3,7,12,0.95);
+  position:relative; z-index:1; flex-shrink:0;
+}
+.s-qbtn {
+  background:rgba(0,240,255,0.04); border:1px solid rgba(0,240,255,0.12);
+  color:rgba(0,240,255,0.5); font-family:'Share Tech Mono',monospace;
+  font-size:9px; padding:5px 9px; border-radius:3px;
+  cursor:pointer; transition:all 0.2s;
+}
+.s-qbtn:hover{background:rgba(0,240,255,0.08);border-color:rgba(0,240,255,0.3);color:#00f0ff;}
+
+.s-input-area {
+  display:flex; border-top:1px solid rgba(255,140,0,0.15);
+  background:rgba(3,7,12,0.98); position:relative; z-index:1; flex-shrink:0;
+}
+.s-input {
+  flex:1; background:transparent; border:none; outline:none;
+  color:#c0e8ff; font-family:'Share Tech Mono',monospace;
+  font-size:11px; padding:12px 14px; letter-spacing:0.3px;
+}
+.s-input::placeholder{color:rgba(0,240,255,0.2);}
+.s-send {
+  background:rgba(255,140,0,0.1); border:none;
+  border-left:1px solid rgba(255,140,0,0.2);
+  color:#ff8c00; padding:12px 14px; cursor:pointer;
+  font-family:'Press Start 2P',monospace; font-size:7px;
+  letter-spacing:0.5px; transition:all 0.2s;
+}
+.s-send:hover{background:rgba(255,140,0,0.2);}
+</style>
+
+<!-- Sentinel Button -->
+<button id="sentinel-btn" onclick="sentToggle()" title="Hovor so Sentinelom">
+  <img src="/hht-sentinel.jpeg" alt="SENTINEL">
+  <div class="s-pulse"></div>
+</button>
+<div id="sentinel-tip">// SENTINEL online</div>
+
+<!-- Sentinel Chat -->
+<div id="sentinel-chat">
+  <div class="s-head">
+    <div class="s-av"><img src="/hht-sentinel.jpeg" alt="S"></div>
+    <div class="s-info">
+      <div class="s-name">SENTINEL</div>
+      <div class="s-role">// GUARDIAN OF HHT ARENA</div>
+      <div class="s-status">
+        <div class="s-dot"></div>
+        <div class="s-stxt">ONLINE</div>
+      </div>
+    </div>
+    <button class="s-close" onclick="sentToggle()">✕</button>
+  </div>
+
+  <div class="s-msgs" id="sentMsgs">
+    <div class="s-msg sentinel">
+      <div class="s-mav s"><img src="/hht-sentinel.jpeg" alt="S"></div>
+      <div class="s-bbl">
+        <div class="s-tag">SENTINEL //</div>
+        <span id="sentIntroText"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="s-quick">
+    <button class="s-qbtn" onclick="sentQuick('What games are in the arena?')">🎮 Hry</button>
+    <button class="s-qbtn" onclick="sentQuick('How do I get VIP access?')">🔐 VIP</button>
+    <button class="s-qbtn" onclick="sentQuick('Give me tips for Void Runner')">🚀 Void Runner</button>
+    <button class="s-qbtn" onclick="sentQuick('Tell me about HHT token')">🪙 $HHT</button>
+  </div>
+
+  <div class="s-input-area">
+    <input class="s-input" id="sentInput" type="text" placeholder="// hovor so Sentinelom..." maxlength="200">
+    <button class="s-send" onclick="sentSend()">▶ SEND</button>
+  </div>
+</div>
+
+<script>
+(function() {
+  const SYSTEM_PROMPT = `You are SENTINEL — the guardian and AI mascot of HHT Arena, the gaming hub of the HappyHouseToken ($HHT) community on Solana.
+
+Your personality:
+- Seasoned, stoic warrior who respects those who prove themselves
+- Speak with authority but never arrogance. Direct and concise
+- Occasionally sarcastic if someone asks something obvious, but never rude
+- Dark cyberpunk military tone
+- If user writes in Slovak, respond in Slovak. Otherwise respond in English.
+
+GAMES IN HHT ARENA:
+1. HHT TETRIS (VIP) — Classic Tetris, HHT cyberpunk skin. Online leaderboard via Supabase.
+2. 2048 (VIP) — Slide and merge tiles. Leaderboard tracked.
+3. TOKEN EATER (VIP, Desktop only) — Pac-Man reskin, eat HHT tokens.
+4. HHT CHESS — vs AI (Easy/Medium/Hard/Expert) or 2 Players local.
+5. VOID RUNNER — Endless runner, dodge pipes, speed increases.
+6. HHT WORM — Snake game, collect coins (+10pts), cherries (+20pts).
+
+VIP ACCESS:
+- Requires minimum 1,000,000 $HHT tokens in wallet
+- Wallets: Phantom, Solflare, Backpack, Trust Wallet
+- VIP unlocks: HHT Tetris, 2048, Token Eater
+
+ABOUT $HHT:
+- HappyHouseToken — Solana meme coin
+- Mint: 4KrNyA5FpFGQj4jQZh1yKzBkobq7mGVftWYVWjfwpump
+- Fair launch on pump.fun, 1 billion supply, 0% team allocation
+- Community: t.me/HappyHouseToken
+- Website: happyhousetoken.com
+
+Keep responses concise (2-4 sentences). Speak naturally, no bullet lists.`;
+
+  const INTRO = "Soldier. You've entered HHT Arena. I am SENTINEL — guardian of these halls. Ask me anything, or prove yourself on the battlefield.";
+
+  let isOpen = false;
+  let history = [];
+
+  // Typewriter intro
+  (function typeIntro() {
+    const el = document.getElementById('sentIntroText');
+    let i = 0;
+    function t() {
+      if (i < INTRO.length) { el.textContent += INTRO.charAt(i++); setTimeout(t, 16); }
+    }
+    t();
+  })();
+
+  // Tooltip on load
+  setTimeout(() => {
+    const tip = document.getElementById('sentinel-tip');
+    tip.classList.add('show');
+    setTimeout(() => tip.classList.remove('show'), 3000);
+  }, 1500);
+
+  window.sentToggle = function() {
+    isOpen = !isOpen;
+    document.getElementById('sentinel-chat').classList.toggle('open', isOpen);
+    if (isOpen) document.getElementById('sentInput').focus();
+  };
+
+  window.sentQuick = function(text) {
+    document.getElementById('sentInput').value = text;
+    sentSend();
+  };
+
+  window.sentSend = async function() {
+    const input = document.getElementById('sentInput');
+    const text = input.value.trim();
+    if (!text) return;
+    input.value = '';
+
+    addMsg(text, 'user');
+    history.push({ role: 'user', content: text });
+    const typingEl = addTyping();
+
+    try {
+      const res = await fetch('/.netlify/functions/sentinel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: history, system: SYSTEM_PROMPT })
+      });
+      const data = await res.json();
+      const reply = data.content?.[0]?.text || 'Signal disrupted. Try again, soldier.';
+      typingEl.remove();
+      addMsg(reply, 'sentinel', true);
+      history.push({ role: 'assistant', content: reply });
+    } catch {
+      typingEl.remove();
+      addMsg('Connection lost. The arena comms are down.', 'sentinel');
+    }
+  };
+
+  function addMsg(text, role, typewriter = false) {
+    const msgs = document.getElementById('sentMsgs');
+    const wrap = document.createElement('div');
+    wrap.className = `s-msg ${role}`;
+
+    const av = document.createElement('div');
+    av.className = `s-mav ${role === 'user' ? 'u' : 's'}`;
+    if (role === 'user') {
+      av.textContent = 'YOU';
+    } else {
+      const img = document.createElement('img');
+      img.src = '/hht-sentinel.jpeg';
+      av.appendChild(img);
+    }
+
+    const bbl = document.createElement('div');
+    bbl.className = 's-bbl';
+    if (role === 'sentinel') {
+      const tag = document.createElement('div');
+      tag.className = 's-tag';
+      tag.textContent = 'SENTINEL //';
+      bbl.appendChild(tag);
+    }
+    const txt = document.createElement('span');
+    bbl.appendChild(txt);
+    wrap.appendChild(av);
+    wrap.appendChild(bbl);
+    msgs.appendChild(wrap);
+
+    if (typewriter && role === 'sentinel') {
+      let i = 0;
+      function t() {
+        if (i < text.length) { txt.textContent += text.charAt(i++); msgs.scrollTop = msgs.scrollHeight; setTimeout(t, 16); }
+      }
+      t();
+    } else {
+      txt.textContent = text;
+      msgs.scrollTop = msgs.scrollHeight;
+    }
+  }
+
+  function addTyping() {
+    const msgs = document.getElementById('sentMsgs');
+    const wrap = document.createElement('div');
+    wrap.className = 's-msg sentinel';
+    const av = document.createElement('div');
+    av.className = 's-mav s';
+    const img = document.createElement('img');
+    img.src = '/hht-sentinel.jpeg';
+    av.appendChild(img);
+    const bbl = document.createElement('div');
+    bbl.className = 's-typing';
+    bbl.innerHTML = '<span></span><span></span><span></span>';
+    wrap.appendChild(av);
+    wrap.appendChild(bbl);
+    msgs.appendChild(wrap);
+    msgs.scrollTop = msgs.scrollHeight;
+    return wrap;
+  }
+
+  document.getElementById('sentInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') sentSend();
+  });
+})();
+</script>
+<!-- ============ END SENTINEL WIDGET ============ -->
