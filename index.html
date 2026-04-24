@@ -837,7 +837,7 @@ footer {
 <div id="live-banner">
   <div class="dot"></div>
   <span class="txt">🏠 We Are Live</span>
-  <a href="https://pump.fun/coin/4KrNyA5FpFGQj4jQZh1yKzBkobq7mGVftWYVWjfwpump" target="_blank">BUY $HHT</a>
+  
 </div>
 
 <!-- NAV -->
@@ -863,7 +863,7 @@ footer {
         <a href="hht-library.html">📚 Library</a>
       </div>
     </li>
-    <li><a href="https://pump.fun/coin/4KrNyA5FpFGQj4jQZh1yKzBkobq7mGVftWYVWjfwpump" target="_blank" class="nbuy">🚀 Buy $HHT</a></li>
+    
   </ul>
   <button id="burger" aria-label="Menu">
     <span></span><span></span><span></span>
@@ -884,7 +884,7 @@ footer {
   <a href="hht-livingroom.html">🛋️ Living Room</a>
   <a href="hht-garage.html">🔧 Garage</a>
   <a href="hht-library.html">📚 Library</a>
-  <a href="https://pump.fun/coin/4KrNyA5FpFGQj4jQZh1yKzBkobq7mGVftWYVWjfwpump" target="_blank" style="color:var(--yellow);">🚀 Buy $HHT</a>
+  
 </div>
 <div id="dimmer"></div>
 
@@ -907,7 +907,7 @@ footer {
   </p>
 
   <div class="hero-actions">
-    <a href="https://pump.fun/coin/4KrNyA5FpFGQj4jQZh1yKzBkobq7mGVftWYVWjfwpump" target="_blank" class="btn-buy">🚀 Buy $HHT</a>
+    
     <a href="https://t.me/HappyHouseToken" target="_blank" class="btn-secondary">Join Telegram</a>
   </div>
 
@@ -1181,7 +1181,7 @@ footer {
         <span class="step-icon">🚀</span>
         <div class="step-title">Swap for $HHT</div>
         <div class="step-desc">Go to pump.fun, paste the $HHT contract address and swap your SOL for $HHT. Welcome to the HappyHouse!</div>
-        <a href="https://pump.fun/coin/4KrNyA5FpFGQj4jQZh1yKzBkobq7mGVftWYVWjfwpump" target="_blank" class="step-link">Buy on pump.fun →</a>
+        
       </div>
 
     </div>
@@ -1547,6 +1547,29 @@ function copyAddress() {
   loadHeroNews();
   setInterval(loadHeroNews, 5 * 60 * 1000);
 })();
+</script>
+
+<!-- SENTINEL WIDGET -->
+<script>
+fetch("/sentinel-widget.html")
+  .then(r => r.text())
+  .then(html => {
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    Array.from(div.childNodes).forEach(node => {
+      if (node.nodeName !== 'SCRIPT' && node.nodeName !== 'LINK') document.body.appendChild(node);
+    });
+    Array.from(div.querySelectorAll('link')).forEach(el => {
+      const link = document.createElement('link');
+      link.rel = el.rel; link.href = el.href;
+      document.head.appendChild(link);
+    });
+    Array.from(div.querySelectorAll('script')).forEach(old => {
+      const s = document.createElement('script');
+      s.textContent = old.textContent;
+      document.body.appendChild(s);
+    });
+  });
 </script>
 </body>
 </html>
