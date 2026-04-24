@@ -1220,7 +1220,23 @@
 <script>
 fetch("/sentinel-widget.html")
   .then(r => r.text())
-  .then(html => document.body.insertAdjacentHTML("beforeend", html));
+  .then(html => {
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    Array.from(div.childNodes).forEach(node => {
+      if (node.nodeName !== 'SCRIPT' && node.nodeName !== 'LINK') document.body.appendChild(node);
+    });
+    Array.from(div.querySelectorAll('link')).forEach(el => {
+      const link = document.createElement('link');
+      link.rel = el.rel; link.href = el.href;
+      document.head.appendChild(link);
+    });
+    Array.from(div.querySelectorAll('script')).forEach(old => {
+      const s = document.createElement('script');
+      s.textContent = old.textContent;
+      document.body.appendChild(s);
+    });
+  });
 </script>
 </body>
 </html>
