@@ -528,7 +528,8 @@ body {
       <div class="btn-row">
         <button class="opt-btn diff-btn" onclick="selectDiff(1)">Easy</button>
         <button class="opt-btn diff-btn" onclick="selectDiff(2)">Medium</button>
-        <button class="opt-btn diff-btn" onclick="selectDiff(3)">Hard</button>
+        <button class="opt-btn diff-btn" onclick="selectDiff(4)">Hard</button>
+        <button class="opt-btn diff-btn" onclick="selectDiff(5)">Expert</button>
       </div>
     </div>
 
@@ -661,6 +662,13 @@ let playerColor = WHITE;
 let aiDepth = 2;
 let enPassantSq = null; // {row,col} or null
 let castleRights = { W:{k:true,q:true}, B:{k:true,q:true} };
+let positionHistory = {};
+
+function boardKey() {
+  return board.map(r=>r.join(',')).join('|') + '|' + turn +
+    '|' + (enPassantSq ? enPassantSq.row+','+enPassantSq.col : '-') +
+    '|' + (castleRights.W.k?1:0)+(castleRights.W.q?1:0)+(castleRights.B.k?1:0)+(castleRights.B.q?1:0);
+}
 let capturedWhite = []; // pieces captured from white
 let capturedBlack = []; // pieces captured from black
 let aiThinking = false;
@@ -688,6 +696,7 @@ function initBoard() {
   lastMove = null;
   moveCount = 0;
   aiThinking = false;
+  positionHistory = {};
 }
 
 // ── Is in bounds ───────────────────────────────
@@ -1089,7 +1098,7 @@ function updateStatus() {
   turnEl.className = 'turn-dot ' + (turn===WHITE?'turn-white':'turn-black');
 
   const diffEl = document.getElementById('diff-display');
-  if(diffEl) { const labels={1:'Easy',2:'Medium',3:'Hard'}; diffEl.textContent=labels[aiDepth]||'Medium'; }
+  if(diffEl) { const labels={1:'Easy',2:'Medium',4:'Hard',5:'Expert'}; diffEl.textContent=labels[aiDepth]||'Medium'; }
 }
 
 function setGameOver(msg) {
@@ -1098,9 +1107,10 @@ function setGameOver(msg) {
   // Determine result for leaderboard (only in AI mode)
   if (gameMode === 'ai') {
     let result = 'draw';
-    if (msg.includes('CHECKMATE')) {
-      const winner = msg.includes('White') ? WHITE : BLACK;
-      result = winner === playerColor ? 'win' : 'loss';
+    if (msg.includes('CHECKMATE') || msg.includes('RESIGNED')) {
+      const winnerIsWhite = msg.includes('White Wins');
+      const winnerColor = winnerIsWhite ? WHITE : BLACK;
+      result = winnerColor === playerColor ? 'win' : 'loss';
     }
     cSubmitScore(result);
   }
@@ -1185,6 +1195,16 @@ function executeMove(move) {
   }
 
   turn = opponent(turn);
+
+  // Threefold repetition check
+  const key = boardKey();
+  positionHistory[key] = (positionHistory[key] || 0) + 1;
+  if (positionHistory[key] >= 3) {
+    setGameOver('DRAW — Threefold Repetition!');
+    renderBoard();
+    return;
+  }
+
   renderBoard();
   checkAI();
 }
@@ -1214,6 +1234,16 @@ function finishPromo(piece) {
   board[tr][tc] = piece;
   pendingPromo = null;
   turn = opponent(turn);
+
+  // Threefold repetition check after promotion
+  const promoKey = boardKey();
+  positionHistory[promoKey] = (positionHistory[promoKey] || 0) + 1;
+  if (positionHistory[promoKey] >= 3) {
+    setGameOver('DRAW — Threefold Repetition!');
+    renderBoard();
+    return;
+  }
+
   renderBoard();
   checkAI();
 }
@@ -1443,7 +1473,7 @@ async function cLoadLb() {
 
 function renderCLb(body, rows) {
   const rankLabels=['🥇','🥈','🥉'], rankClasses=['gold','silver','bronze'];
-  const diffLabels = { Easy:'🟢 Easy', Medium:'🟡 Med', Hard:'🔴 Hard' };
+  const diffLabels = { Easy:'🟢 Easy', Medium:'🟡 Med', Hard:'🔴 Hard', Expert:'⚫ Expert' };
   body.innerHTML = rows.map((row,i)=>{
     const isMe = cPlayer && row.wallet===cPlayer.wallet;
     const rowCls = 'c-lb-row'+(isMe?' is-me':'');
@@ -1466,7 +1496,7 @@ async function cSubmitScore(result) {
   if (!cPlayer) return;
   if (!cGameStartTime) return;
   const timeSecs = Math.round((Date.now() - cGameStartTime) / 1000);
-  const diffLabels = {1:'Easy', 2:'Medium', 3:'Hard'};
+  const diffLabels = {1:'Easy', 2:'Medium', 4:'Hard', 5:'Expert'};
   const level = diffLabels[aiDepth] || 'Medium';
   try {
     await cSbFetch('POST', C_TABLE, {
