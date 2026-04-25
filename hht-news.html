@@ -909,20 +909,36 @@ setInterval(updateClock, 1000);
 
 // ── NEWS FETCH ──
 async function fetchNews() {
+  const SOURCE_MAP = {
+    'cointelegraph': 'Cointelegraph', 'decrypt': 'Decrypt',
+    'cryptonews': 'CryptoNews', 'coindesk': 'CoinDesk',
+    'theblock': 'The Block', 'bitcoinmagazine': 'Bitcoin Magazine',
+    'beincrypto': 'BeInCrypto', 'ambcrypto': 'AMBCrypto',
+    'cryptoslate': 'CryptoSlate', 'newsbtc': 'NewsBTC',
+  };
   try {
-    const res = await fetch('/.netlify/functions/crypto-news');
+    const res = await fetch('https://min-api.cryptocompare.com/data/v2/news/?lang=EN&sortOrder=latest');
     if (!res.ok) throw new Error('fetch failed');
     const data = await res.json();
-    if (!data.success || !data.news.length) throw new Error('empty');
+    if (data.Response !== 'Success' || !data.Data?.length) throw new Error('empty');
 
-    allNewsData = data.news;
+    allNewsData = data.Data.slice(0, 12).map(item => {
+      const sourceKey = (item.source || '').toLowerCase();
+      return {
+        title:       item.title || '',
+        link:        item.url || '',
+        pubDate:     new Date(item.published_on * 1000).toISOString(),
+        description: (item.body || '').replace(/<[^>]+>/g, '').substring(0, 160) + '...',
+        image:       item.imageurl || '',
+        source:      SOURCE_MAP[sourceKey] || item.source_info?.name || item.source || 'Crypto'
+      };
+    }).filter(i => i.title && i.link);
 
-    const t = new Date(data.lastUpdated);
-    const timeStr = t.toUTCString().slice(17,22) + ' UTC';
+    const timeStr = new Date().toUTCString().slice(17,22) + ' UTC';
     document.getElementById('lastUpdated').textContent = 'SYNC: ' + timeStr;
     document.getElementById('heroUpdated').textContent = 'SYNCED ' + timeStr;
 
-    const titles = data.news.map(n => n.title).join('   ·   ');
+    const titles = allNewsData.map(n => n.title).join('   ·   ');
     document.getElementById('tickerText').textContent = titles + '   ·   ' + titles;
 
     renderNews(allNewsData);
@@ -984,28 +1000,20 @@ async function analyzeArticle(item, idx) {
   }
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch('/.netlify/functions/ai-analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 120,
-        system: `You analyze crypto news headlines. Respond ONLY with JSON, no markdown, no explanation.
-Format: {"sentiment":"bullish"|"bearish"|"neutral","summary":"max 15 words summary of the news"}`,
-        messages: [{
-          role: 'user',
-          content: `Headline: ${item.title}\nDescription: ${item.description || ''}`
-        }]
+        type: 'article',
+        title: item.title,
+        description: item.description || ''
       })
     });
 
-    const data = await res.json();
-    const text = data.content?.[0]?.text || '';
-    const parsed = JSON.parse(text.replace(/```json|```/g, '').trim());
+    const parsed = await res.json();
     aiSummaryCache[cacheKey] = parsed;
     applyAiResult(idx, parsed);
   } catch(e) {
-    // Silently fail — remove loading state
     const el = document.getElementById(`ai-summary-${idx}`);
     if (el) el.style.display = 'none';
   }
@@ -1176,24 +1184,15 @@ function renderGainers(coins) {
 
 async function fetchRadarAiSummary() {
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch('/.netlify/functions/ai-analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 100,
-        system: 'You are a crypto market analyst. Write a 2-sentence market brief. Be direct, no disclaimers. Use simple language.',
-        messages: [{
-          role: 'user',
-          content: 'Give me a brief 2-sentence summary of current crypto market sentiment. Mention if meme coins are active.'
-        }]
-      })
+      body: JSON.stringify({ type: 'market' })
     });
     const data = await res.json();
-    const text = data.content?.[0]?.text || '';
-    if (text) {
+    if (data.summary) {
       document.getElementById('radarAiSummary').innerHTML =
-        text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        data.summary.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
     }
   } catch(e) {
     document.getElementById('radarAiSummary').textContent = 'Market data unavailable.';
