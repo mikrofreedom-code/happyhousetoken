@@ -75,6 +75,38 @@ Format: {"sentiment":"bullish"|"bearish"|"neutral","summary":"max 15 words summa
       return { statusCode: 200, headers, body: JSON.stringify({ summary: text }) };
     }
 
+    // ── HHT Price from DexScreener ──
+    if (type === 'hht-price') {
+      const CA = '4KrNyA5FpFGQj4jQZh1yKzBkobq7mGVftWYVWjfwpump';
+      const { body: dexBody } = await new Promise((resolve, reject) => {
+        https.get(`https://api.dexscreener.com/latest/dex/tokens/${CA}`, {
+          headers: { 'User-Agent': 'Mozilla/5.0' },
+          timeout: 8000
+        }, (res) => {
+          let data = '';
+          res.on('data', c => data += c);
+          res.on('end', () => resolve({ statusCode: res.statusCode, body: data }));
+        }).on('error', reject);
+      });
+
+      const dexData = JSON.parse(dexBody);
+      const pairs = dexData.pairs || [];
+      if (!pairs.length) return { statusCode: 200, headers, body: JSON.stringify({ error: 'no pairs' }) };
+
+      const pair = pairs.sort((a, b) => (b.liquidity?.usd || 0) - (a.liquidity?.usd || 0))[0];
+      const price = parseFloat(pair.priceUsd || 0);
+      const change = pair.priceChange?.h24 || 0;
+      const mcap = pair.marketCap || pair.fdv || 0;
+      const vol = pair.volume?.h24 || 0;
+      const liq = pair.liquidity?.usd || 0;
+
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({ price, change, mcap, vol, liq })
+      };
+    }
+
     // ── Sentinel chat ──
     if (type === 'sentinel') {
       const { system, messages } = JSON.parse(event.body);
