@@ -706,6 +706,94 @@
     @media (max-width: 1100px) {
       .radar-sidebar { display: none; }
     }
+
+    /* ── HHT SENTINEL ── */
+    #hht-chat-btn {
+      position: fixed; bottom: 24px; right: 24px;
+      width: 64px; height: 64px; border-radius: 50%;
+      background: #000; border: 2px solid #ff8c00;
+      box-shadow: 0 0 20px rgba(255,140,0,0.5), 0 0 60px rgba(255,140,0,0.15);
+      cursor: pointer; z-index: 9998;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.3s ease; animation: pulse-btn 3s ease-in-out infinite;
+      padding: 0; overflow: hidden;
+    }
+    #hht-chat-btn:hover { transform: scale(1.1); box-shadow: 0 0 30px rgba(255,140,0,0.7); }
+    #hht-chat-btn img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    #hht-close-icon {
+      display: none; position: absolute; width: 100%; height: 100%;
+      align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.75); border-radius: 50%;
+      color: #ff1aaa; font-size: 22px; font-weight: bold; font-family: sans-serif;
+    }
+    #hht-chat-btn.open #hht-close-icon { display: flex; }
+    @keyframes pulse-btn {
+      0%,100% { box-shadow: 0 0 20px rgba(255,140,0,0.5), 0 0 60px rgba(255,140,0,0.15); }
+      50% { box-shadow: 0 0 35px rgba(255,140,0,0.8), 0 0 90px rgba(255,140,0,0.25); }
+    }
+    #hht-chat-window {
+      position: fixed; bottom: 100px; right: 24px;
+      width: 360px; height: 520px;
+      background: #06080f; border: 1px solid rgba(255,140,0,0.25);
+      border-radius: 16px; z-index: 9999;
+      display: flex; flex-direction: column; overflow: hidden;
+      box-shadow: 0 0 40px rgba(255,140,0,0.1), 0 20px 60px rgba(0,0,0,0.8);
+      transform: translateY(20px) scale(0.95); opacity: 0; pointer-events: none;
+      transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    #hht-chat-window.visible { transform: translateY(0) scale(1); opacity: 1; pointer-events: all; }
+    #hht-chat-window::before {
+      content: ''; position: absolute; inset: 0; border-radius: 16px;
+      background: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,140,0,0.012) 2px,rgba(255,140,0,0.012) 4px);
+      pointer-events: none; z-index: 1;
+    }
+    #hht-header {
+      background: linear-gradient(135deg,#0a0800,#110f04);
+      border-bottom: 1px solid rgba(255,140,0,0.2);
+      padding: 12px 16px; display: flex; align-items: center; gap: 12px;
+      position: relative; z-index: 2;
+    }
+    .hht-avatar {
+      width: 44px; height: 44px; border-radius: 50%;
+      border: 2px solid #ff8c00; box-shadow: 0 0 14px rgba(255,140,0,0.6);
+      overflow: hidden; flex-shrink: 0; animation: sentinel-glow 3s ease-in-out infinite;
+    }
+    .hht-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    @keyframes sentinel-glow {
+      0%,100% { box-shadow: 0 0 14px rgba(255,140,0,0.6); border-color: #ff8c00; }
+      50% { box-shadow: 0 0 26px rgba(255,165,0,0.9); border-color: #ffaa00; }
+    }
+    .hht-header-name { font-family:'IBM Plex Mono',monospace; font-size:9px; color:#ff8c00; letter-spacing:2px; }
+    .hht-header-sub { font-family:'IBM Plex Mono',monospace; font-size:9px; color:rgba(200,216,240,0.35); margin-top:2px; }
+    .hht-header-status { font-size:11px; color:rgba(200,216,240,0.45); margin-top:3px; display:flex; align-items:center; gap:5px; font-family:'IBM Plex Mono',monospace; }
+    .s-dot { width:6px; height:6px; border-radius:50%; background:#00ff88; animation:blink 2s ease-in-out infinite; }
+    #hht-messages { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:12px; position:relative; z-index:2; }
+    #hht-messages::-webkit-scrollbar { width:4px; }
+    #hht-messages::-webkit-scrollbar-thumb { background:rgba(255,140,0,0.2); border-radius:2px; }
+    .hht-msg { max-width:85%; animation:msg-in 0.3s ease; }
+    @keyframes msg-in { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+    .hht-msg.bot { align-self:flex-start; }
+    .hht-msg.user { align-self:flex-end; }
+    .hht-msg-bubble { padding:10px 14px; border-radius:12px; font-family:'Syne',sans-serif; font-size:14px; font-weight:500; line-height:1.5; }
+    .hht-msg.bot .hht-msg-bubble { background:linear-gradient(135deg,#0f0c06,#171208); border:1px solid rgba(255,140,0,0.15); color:#c8d8f0; border-bottom-left-radius:4px; }
+    .hht-msg.user .hht-msg-bubble { background:linear-gradient(135deg,rgba(255,140,0,0.12),rgba(255,140,0,0.06)); border:1px solid rgba(255,140,0,0.25); color:#f0e8d8; border-bottom-right-radius:4px; }
+    .hht-quick-replies { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+    .hht-quick-btn { background:transparent; border:1px solid rgba(255,140,0,0.35); color:#ff8c00; font-family:'Syne',sans-serif; font-size:12px; font-weight:600; padding:5px 10px; border-radius:20px; cursor:pointer; transition:all 0.2s; }
+    .hht-quick-btn:hover { background:rgba(255,140,0,0.1); }
+    .typing-indicator { display:flex; gap:4px; padding:12px 14px; background:linear-gradient(135deg,#0f0c06,#171208); border:1px solid rgba(255,140,0,0.15); border-radius:12px; border-bottom-left-radius:4px; width:fit-content; }
+    .typing-dot { width:6px; height:6px; border-radius:50%; background:#ff8c00; animation:typing 1.4s ease-in-out infinite; }
+    .typing-dot:nth-child(2){animation-delay:0.2s} .typing-dot:nth-child(3){animation-delay:0.4s}
+    @keyframes typing { 0%,100%{opacity:0.2;transform:translateY(0)} 50%{opacity:1;transform:translateY(-4px)} }
+    #hht-input-area { border-top:1px solid rgba(255,140,0,0.15); padding:12px 14px; display:flex; gap:10px; align-items:flex-end; background:linear-gradient(135deg,#060400,#0d0900); position:relative; z-index:2; }
+    #hht-input { flex:1; background:rgba(255,255,255,0.03); border:1px solid rgba(255,140,0,0.2); border-radius:10px; padding:10px 14px; color:#c8d8f0; font-family:'Syne',sans-serif; font-size:14px; resize:none; max-height:80px; outline:none; transition:border-color 0.2s; line-height:1.4; }
+    #hht-input::placeholder { color:rgba(200,216,240,0.25); }
+    #hht-input:focus { border-color:rgba(255,140,0,0.5); }
+    #hht-send-btn { width:40px; height:40px; border-radius:10px; background:linear-gradient(135deg,rgba(255,140,0,0.2),rgba(255,140,0,0.08)); border:1px solid #ff8c00; color:#ff8c00; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s; flex-shrink:0; }
+    #hht-send-btn:hover { background:rgba(255,140,0,0.25); box-shadow:0 0 15px rgba(255,140,0,0.35); }
+    #hht-send-btn:disabled { opacity:0.4; cursor:not-allowed; }
+    #hht-send-btn svg { width:18px; height:18px; fill:currentColor; }
+    .hht-chat-footer { text-align:center; padding:6px; font-family:'IBM Plex Mono',monospace; font-size:9px; color:rgba(200,216,240,0.15); background:#040200; position:relative; z-index:2; letter-spacing:1px; }
+    @media(max-width:420px) { #hht-chat-window{width:calc(100vw - 20px);right:10px;bottom:90px;height:460px;} }
   </style>
 </head>
 <body>
@@ -909,36 +997,20 @@ setInterval(updateClock, 1000);
 
 // ── NEWS FETCH ──
 async function fetchNews() {
-  const SOURCE_MAP = {
-    'cointelegraph': 'Cointelegraph', 'decrypt': 'Decrypt',
-    'cryptonews': 'CryptoNews', 'coindesk': 'CoinDesk',
-    'theblock': 'The Block', 'bitcoinmagazine': 'Bitcoin Magazine',
-    'beincrypto': 'BeInCrypto', 'ambcrypto': 'AMBCrypto',
-    'cryptoslate': 'CryptoSlate', 'newsbtc': 'NewsBTC',
-  };
   try {
-    const res = await fetch('https://min-api.cryptocompare.com/data/v2/news/?lang=EN&sortOrder=latest');
+    const res = await fetch('/.netlify/functions/crypto-news');
     if (!res.ok) throw new Error('fetch failed');
     const data = await res.json();
-    if (data.Response !== 'Success' || !data.Data?.length) throw new Error('empty');
+    if (!data.success || !data.news.length) throw new Error('empty');
 
-    allNewsData = data.Data.slice(0, 12).map(item => {
-      const sourceKey = (item.source || '').toLowerCase();
-      return {
-        title:       item.title || '',
-        link:        item.url || '',
-        pubDate:     new Date(item.published_on * 1000).toISOString(),
-        description: (item.body || '').replace(/<[^>]+>/g, '').substring(0, 160) + '...',
-        image:       item.imageurl || '',
-        source:      SOURCE_MAP[sourceKey] || item.source_info?.name || item.source || 'Crypto'
-      };
-    }).filter(i => i.title && i.link);
+    allNewsData = data.news;
 
-    const timeStr = new Date().toUTCString().slice(17,22) + ' UTC';
+    const t = new Date(data.lastUpdated);
+    const timeStr = t.toUTCString().slice(17,22) + ' UTC';
     document.getElementById('lastUpdated').textContent = 'SYNC: ' + timeStr;
     document.getElementById('heroUpdated').textContent = 'SYNCED ' + timeStr;
 
-    const titles = allNewsData.map(n => n.title).join('   ·   ');
+    const titles = data.news.map(n => n.title).join('   ·   ');
     document.getElementById('tickerText').textContent = titles + '   ·   ' + titles;
 
     renderNews(allNewsData);
@@ -1301,5 +1373,157 @@ setInterval(fetchRadar, 5 * 60 * 1000);
 setInterval(fetchPriceTicker, 60 * 1000);
 setInterval(fetchHHT, 60 * 1000);
 </script>
+
+<!-- HHT SENTINEL -->
+<button id="hht-chat-btn" onclick="toggleChat()" title="HHT Sentinel">
+  <img src="hht_sentinel.jpeg" alt="HHT Sentinel">
+  <div id="hht-close-icon">✕</div>
+</button>
+
+<div id="hht-chat-window">
+  <div id="hht-header">
+    <div class="hht-avatar"><img src="hht_sentinel.jpeg" alt="Sentinel"></div>
+    <div>
+      <div class="hht-header-name">HHT SENTINEL</div>
+      <div class="hht-header-sub">HappyHouseToken Assistant</div>
+      <div class="hht-header-status"><span class="s-dot"></span>Online · Ready</div>
+    </div>
+  </div>
+  <div id="hht-messages"></div>
+  <div id="hht-input-area">
+    <textarea id="hht-input" placeholder="Ask about HHT..." rows="1"
+      onkeydown="handleSentinelKey(event)" oninput="autoResizeSentinel(this)"></textarea>
+    <button id="hht-send-btn" onclick="sendSentinelMessage()">
+      <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+    </button>
+  </div>
+  <div class="hht-chat-footer">happyhousetoken.com · $HHT on Solana</div>
+</div>
+
+<script>
+// ── HHT SENTINEL ──
+const SENTINEL_SYSTEM = `You are HHT Sentinel — the official AI assistant for HappyHouseToken ($HHT).
+STRICT RULES:
+- Answer ONLY questions about HappyHouseToken, HHT Arena, $HHT community, how to buy/use $HHT, or crypto news on this page
+- If asked about ANYTHING unrelated, reply: "I only answer questions about HappyHouseToken 🛡️ What do you want to know about $HHT?"
+- Keep answers SHORT — max 2 sentences. No long explanations
+- Friendly, slightly degen tone — meme coin community vibes
+- Max 1-2 emojis per message. Never give financial advice
+- If unsure, direct to Telegram: t.me/HappyHouseToken
+HHT KNOWLEDGE:
+- Token: $HHT on Solana | Mint: 4KrNyA5FpFGQj4jQZh1yKzBkobq7mGVftWYVWjfwpump
+- Fair launch on pump.fun | 1 billion supply | 0% team tokens
+- Website: happyhousetoken.com | Telegram: t.me/HappyHouseToken
+- Buy on Jupiter: jup.ag/swap | Wallets: Phantom, Solflare, Backpack
+HHT ARENA: Games: Tetris, 2048, Token Eater, Puzzle, Chess | VIP: requires 1,000,000 $HHT
+Respond in the same language the user writes in (Slovak or English).`;
+
+let sentinelOpen = false;
+let sentinelLoading = false;
+let sentinelHistory = [];
+const SENTINEL_QUICK = ["What is $HHT? 🏠","How to buy? 💰","Arena games 🎮","VIP access 👑","Telegram 📢"];
+
+function toggleChat() {
+  sentinelOpen = !sentinelOpen;
+  document.getElementById('hht-chat-window').classList.toggle('visible', sentinelOpen);
+  document.getElementById('hht-chat-btn').classList.toggle('open', sentinelOpen);
+  if (sentinelOpen && sentinelHistory.length === 0) sentinelWelcome();
+  if (sentinelOpen) setTimeout(() => document.getElementById('hht-input').focus(), 300);
+}
+
+function sentinelWelcome() {
+  addSentinelBot("gm! I'm HHT Sentinel 🛡️ Ask me anything about HappyHouseToken!", SENTINEL_QUICK);
+}
+
+function addSentinelBot(text, quickReplies = []) {
+  const msgs = document.getElementById('hht-messages');
+  const div = document.createElement('div');
+  div.className = 'hht-msg bot';
+  let html = `<div class="hht-msg-bubble">${sentinelEsc(text)}</div>`;
+  if (quickReplies.length) {
+    html += `<div class="hht-quick-replies">${quickReplies.map(q =>
+      `<button class="hht-quick-btn" onclick="sentinelQuick('${q}')">${q}</button>`).join('')}</div>`;
+  }
+  div.innerHTML = html;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function addSentinelUser(text) {
+  const msgs = document.getElementById('hht-messages');
+  const div = document.createElement('div');
+  div.className = 'hht-msg user';
+  div.innerHTML = `<div class="hht-msg-bubble">${sentinelEsc(text)}</div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function sentinelTyping() {
+  const msgs = document.getElementById('hht-messages');
+  const div = document.createElement('div');
+  div.className = 'hht-msg bot'; div.id = 'hht-typing';
+  div.innerHTML = `<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function sentinelEsc(t) {
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+
+function sentinelQuick(text) {
+  document.getElementById('hht-input').value = text;
+  sendSentinelMessage();
+}
+
+function handleSentinelKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendSentinelMessage(); }
+}
+
+function autoResizeSentinel(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 80) + 'px';
+}
+
+async function sendSentinelMessage() {
+  if (sentinelLoading) return;
+  const input = document.getElementById('hht-input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  input.value = ''; input.style.height = 'auto';
+  addSentinelUser(text);
+  sentinelHistory.push({ role: 'user', content: text });
+
+  sentinelLoading = true;
+  document.getElementById('hht-send-btn').disabled = true;
+  sentinelTyping();
+
+  try {
+    const res = await fetch('/.netlify/functions/ai-analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'sentinel',
+        system: SENTINEL_SYSTEM,
+        messages: sentinelHistory
+      })
+    });
+    const data = await res.json();
+    const reply = data.reply || "Something went wrong ser 🔧 Try again!";
+    sentinelHistory.push({ role: 'assistant', content: reply });
+    document.getElementById('hht-typing')?.remove();
+    addSentinelBot(reply);
+  } catch(e) {
+    document.getElementById('hht-typing')?.remove();
+    addSentinelBot("Connection issue 🔧 Try again!");
+  }
+
+  sentinelLoading = false;
+  document.getElementById('hht-send-btn').disabled = false;
+  input.focus();
+}
+</script>
+
 </body>
 </html>
