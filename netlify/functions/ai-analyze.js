@@ -75,6 +75,22 @@ Format: {"sentiment":"bullish"|"bearish"|"neutral","summary":"max 15 words summa
       return { statusCode: 200, headers, body: JSON.stringify({ summary: text }) };
     }
 
+    // ── Sentinel chat ──
+    if (type === 'sentinel') {
+      const { system, messages } = JSON.parse(event.body);
+      if (!messages?.length) return { statusCode: 400, headers, body: JSON.stringify({ error: 'Missing messages' }) };
+
+      const data = await callAnthropic({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 150,
+        system: system || '',
+        messages: messages.slice(-10) // keep last 10 messages
+      });
+
+      const reply = data.content?.[0]?.text || "Something went wrong 🔧";
+      return { statusCode: 200, headers, body: JSON.stringify({ reply }) };
+    }
+
     return { statusCode: 400, headers, body: JSON.stringify({ error: 'Invalid type' }) };
 
   } catch (e) {
