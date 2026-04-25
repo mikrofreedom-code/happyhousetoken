@@ -29,7 +29,6 @@
       overflow-x: hidden;
       cursor: crosshair;
     }
-    /* scan lines */
     body::before {
       content: '';
       position: fixed; inset: 0;
@@ -39,7 +38,6 @@
       );
       pointer-events: none; z-index: 0;
     }
-    /* corner geometry */
     .geo-corner {
       position: fixed; width: 300px; height: 300px;
       pointer-events: none; z-index: 0; opacity: 0.05;
@@ -69,6 +67,74 @@
     .status-ticker { overflow: hidden; max-width: 420px; flex: 1; margin: 0 24px; }
     .status-ticker-inner { white-space: nowrap; animation: tickMove 30s linear infinite; }
     @keyframes tickMove { 0%{transform:translateX(100%)} 100%{transform:translateX(-100%)} }
+
+    /* ── PRICE TICKER ── */
+    #priceTicker {
+      position: relative; z-index: 10;
+      background: var(--bg);
+      border-bottom: 1px solid var(--line);
+      height: 36px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+    }
+    #priceTicker::before {
+      content: 'TOP 10';
+      position: absolute; left: 0; top: 0; bottom: 0;
+      z-index: 2;
+      display: flex; align-items: center;
+      padding: 0 14px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 8px; letter-spacing: 3px;
+      color: var(--dim);
+      background: var(--surface);
+      border-right: 1px solid var(--line);
+      white-space: nowrap;
+    }
+    #priceTicker::after {
+      content: '';
+      position: absolute; right: 0; top: 0; bottom: 0;
+      width: 60px;
+      background: linear-gradient(to right, transparent, var(--bg));
+      z-index: 2;
+      pointer-events: none;
+    }
+    .price-ticker-track {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      padding-left: 80px;
+      animation: priceScroll 40s linear infinite;
+      white-space: nowrap;
+      will-change: transform;
+    }
+    @keyframes priceScroll {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    .price-ticker-track:hover { animation-play-state: paused; }
+    .ticker-item {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 0 24px;
+      border-right: 1px solid rgba(255,255,255,0.06);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      cursor: default;
+    }
+    .ticker-item:last-child { border-right: none; }
+    .ticker-rank {
+      font-size: 8px; color: var(--dim); letter-spacing: 1px;
+    }
+    .ticker-symbol { color: var(--white); font-weight: 500; letter-spacing: 1px; }
+    .ticker-price  { color: rgba(255,255,255,0.6); }
+    .ticker-change { font-weight: 500; }
+    .ticker-up   { color: #00ff64; }
+    .ticker-down { color: #ff5555; }
+    .ticker-icon {
+      width: 16px; height: 16px; border-radius: 50%;
+      object-fit: cover; vertical-align: middle;
+      filter: grayscale(0.3);
+    }
 
     /* ── NAV ── */
     nav {
@@ -127,7 +193,6 @@
     }
     @media (max-width: 768px) { .hero { height: 360px; } }
     @media (max-width: 480px) { .hero { height: 280px; } }
-
     .hero-img {
       position: absolute; inset: 0;
       width: 100%; height: 100%;
@@ -140,8 +205,6 @@
       from { transform: scale(1.04); }
       to   { transform: scale(1.12); }
     }
-
-    /* grid overlay on hero */
     .hero-grid {
       position: absolute; inset: 0;
       background-image:
@@ -149,7 +212,6 @@
         linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
       background-size: 60px 60px;
     }
-    /* vignette */
     .hero-vignette {
       position: absolute; inset: 0;
       background: linear-gradient(
@@ -160,7 +222,6 @@
         rgba(5,6,8,0.85) 100%
       );
     }
-
     .hero-content {
       position: absolute; inset: 0;
       display: flex; flex-direction: column;
@@ -168,7 +229,6 @@
       padding: 48px;
     }
     @media (max-width: 600px) { .hero-content { padding: 28px 24px; } }
-
     .hero-eyebrow {
       font-family: 'IBM Plex Mono', monospace;
       font-size: 9px; letter-spacing: 5px; color: rgba(255,255,255,0.5);
@@ -176,7 +236,6 @@
       display: flex; align-items: center; gap: 10px;
     }
     .hero-eyebrow::before { content: ''; width: 20px; height: 1px; background: rgba(255,255,255,0.4); }
-
     .hero h1 {
       font-family: 'Syne', sans-serif;
       font-size: clamp(42px, 7vw, 88px);
@@ -191,7 +250,6 @@
       color: transparent;
       -webkit-text-stroke: 1px rgba(255,255,255,0.4);
     }
-
     .hero-meta {
       margin-top: 20px;
       display: flex; gap: 28px; flex-wrap: wrap;
@@ -200,8 +258,6 @@
     }
     .hero-meta span { display: flex; align-items: center; gap: 6px; }
     .hero-meta span::before { content: '◈'; font-size: 7px; }
-
-    /* live badge */
     .hero-live {
       position: absolute; top: 24px; right: 28px;
       display: flex; align-items: center; gap: 7px;
@@ -246,22 +302,28 @@
     }
     .filter-count strong { color: var(--white); }
 
-    /* ── NEWS GRID ── */
-    .news-section {
+    /* ── MAIN LAYOUT WITH SIDEBAR ── */
+    .main-layout {
       position: relative; z-index: 5;
       max-width: 1360px; margin: 0 auto;
       padding: 0 48px 80px;
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 0;
+      align-items: start;
     }
-    @media (max-width: 600px) { .news-section { padding: 0 0 60px; } }
+    @media (max-width: 1100px) { .main-layout { grid-template-columns: 1fr; } }
+    @media (max-width: 600px) { .main-layout { padding: 0 0 60px; } }
 
+    /* ── NEWS GRID ── */
+    .news-section { min-width: 0; }
     .news-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       border-left: 1px solid var(--line);
       border-top: 1px solid var(--line);
     }
-    @media (max-width: 960px) { .news-grid { grid-template-columns: repeat(2,1fr); } }
-    @media (max-width: 580px) { .news-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 700px) { .news-grid { grid-template-columns: 1fr; } }
 
     /* ── CARD ── */
     .news-card {
@@ -284,12 +346,10 @@
     }
     .news-card:hover { background: var(--mark); }
     .news-card:hover::after { transform: translateX(120%); }
-
     @keyframes fadeCard {
       from { opacity: 0; transform: translateY(10px); }
       to   { opacity: 1; transform: translateY(0); }
     }
-
     .card-img {
       width: 100%; height: 160px; overflow: hidden;
       position: relative; background: var(--surface2);
@@ -327,6 +387,31 @@
       letter-spacing: -1px;
     }
 
+    /* ── SENTIMENT BADGE ── */
+    .card-sentiment {
+      position: absolute; top: 10px; right: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 8px; letter-spacing: 1px;
+      padding: 3px 8px;
+      backdrop-filter: blur(6px);
+      border-radius: 1px;
+    }
+    .sentiment-bullish {
+      background: rgba(0,255,100,0.15);
+      border: 1px solid rgba(0,255,100,0.4);
+      color: #00ff64;
+    }
+    .sentiment-bearish {
+      background: rgba(255,60,60,0.15);
+      border: 1px solid rgba(255,60,60,0.4);
+      color: #ff5555;
+    }
+    .sentiment-neutral {
+      background: rgba(255,200,0,0.12);
+      border: 1px solid rgba(255,200,0,0.35);
+      color: #ffc800;
+    }
+
     .card-body {
       padding: 20px; flex: 1;
       display: flex; flex-direction: column; gap: 9px;
@@ -344,12 +429,35 @@
       font-size: 11px; font-weight: 400;
       color: var(--off); line-height: 1.7; flex: 1;
     }
+
+    /* ── AI SUMMARY ── */
+    .card-ai-summary {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px; line-height: 1.6;
+      color: rgba(255,255,255,0.4);
+      border-left: 1px solid rgba(255,255,255,0.12);
+      padding-left: 10px;
+      margin-top: 2px;
+    }
+    .card-ai-label {
+      font-size: 8px; letter-spacing: 2px;
+      color: rgba(255,255,255,0.2);
+      margin-bottom: 3px;
+    }
+    .card-ai-loading {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px; color: rgba(255,255,255,0.2);
+      letter-spacing: 2px;
+      animation: blink 1.5s infinite;
+    }
+
     .card-cta {
       display: flex; align-items: center; justify-content: space-between;
       padding-top: 12px; border-top: 1px solid var(--line);
       font-family: 'IBM Plex Mono', monospace;
       font-size: 9px; letter-spacing: 2px; color: var(--dim);
       transition: color 0.2s;
+      margin-top: auto;
     }
     .news-card:hover .card-cta { color: var(--white); }
     .card-arrow {
@@ -411,6 +519,168 @@
     }
     .retry-btn:hover { background: var(--mark); }
 
+    /* ── HHT RADAR SIDEBAR ── */
+    .radar-sidebar {
+      border-left: 1px solid var(--line);
+      border-top: 1px solid var(--line);
+      position: sticky;
+      top: 0;
+      max-height: 100vh;
+      overflow-y: auto;
+      scrollbar-width: none;
+    }
+    .radar-sidebar::-webkit-scrollbar { display: none; }
+
+    .radar-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--line);
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--surface);
+      position: sticky; top: 0; z-index: 2;
+    }
+    .radar-title {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px; letter-spacing: 4px; color: var(--white);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .radar-title::before {
+      content: '◈'; font-size: 8px; color: var(--dim);
+    }
+    .radar-refresh {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 8px; letter-spacing: 1px; color: var(--dim);
+    }
+
+    /* AI Market Summary */
+    .radar-ai-summary {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,0.02);
+    }
+    .radar-section-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 8px; letter-spacing: 3px; color: var(--dim);
+      margin-bottom: 10px;
+    }
+    .radar-ai-text {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px; line-height: 1.7;
+      color: rgba(255,255,255,0.5);
+    }
+    .radar-ai-text strong { color: var(--white); }
+
+    /* Trending list */
+    .radar-section {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--line);
+    }
+    .radar-coin-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      cursor: default;
+      transition: background 0.15s;
+    }
+    .radar-coin-row:last-child { border-bottom: none; }
+    .radar-coin-rank {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px; color: var(--dim); width: 16px; flex-shrink: 0;
+    }
+    .radar-coin-icon {
+      width: 26px; height: 26px; border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.1);
+      overflow: hidden; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+      background: var(--surface2);
+    }
+    .radar-coin-icon img { width: 100%; height: 100%; object-fit: cover; }
+    .radar-coin-info { flex: 1; min-width: 0; }
+    .radar-coin-name {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px; color: var(--white);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .radar-coin-symbol {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 8px; color: var(--dim); letter-spacing: 1px;
+    }
+    .radar-coin-change {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px; font-weight: 500;
+      flex-shrink: 0;
+    }
+    .change-up { color: #00ff64; }
+    .change-down { color: #ff5555; }
+
+    /* Fear & Greed */
+    .radar-fg {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--line);
+    }
+    .fg-bar-wrap {
+      margin-top: 10px;
+      height: 4px;
+      background: rgba(255,255,255,0.07);
+      border-radius: 2px;
+      overflow: hidden;
+      position: relative;
+    }
+    .fg-bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: linear-gradient(90deg, #ff5555 0%, #ffc800 50%, #00ff64 100%);
+      transition: width 1s ease;
+    }
+    .fg-labels {
+      display: flex; justify-content: space-between;
+      margin-top: 6px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 8px; color: var(--dim); letter-spacing: 1px;
+    }
+    .fg-value {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 28px; font-weight: 300;
+      color: var(--white); letter-spacing: -1px;
+      margin-top: 8px;
+      display: flex; align-items: baseline; gap: 10px;
+    }
+    .fg-value span {
+      font-size: 9px; letter-spacing: 3px; color: var(--dim);
+    }
+
+    /* HHT price */
+    .radar-hht {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,0.015);
+    }
+    .hht-price-row {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 10px;
+    }
+    .hht-price-val {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 16px; color: var(--white);
+    }
+    .hht-stats-mini {
+      display: flex; flex-direction: column; gap: 3px;
+      margin-top: 8px;
+    }
+    .hht-stat-row {
+      display: flex; justify-content: space-between;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 8px; color: var(--dim); letter-spacing: 1px;
+    }
+    .hht-stat-row span { color: rgba(255,255,255,0.6); }
+
+    /* Radar loading */
+    .radar-loading {
+      padding: 40px 20px;
+      display: flex; flex-direction: column;
+      align-items: center; gap: 14px;
+    }
+
     /* ── FOOTER ── */
     footer {
       position: relative; z-index: 5;
@@ -432,6 +702,10 @@
       transition: color 0.2s;
     }
     .footer-links a:hover { color: var(--white); }
+
+    @media (max-width: 1100px) {
+      .radar-sidebar { display: none; }
+    }
   </style>
 </head>
 <body>
@@ -469,6 +743,13 @@
   <span id="lastUpdated">SYNC: —</span>
 </div>
 
+<!-- PRICE TICKER -->
+<div id="priceTicker">
+  <div class="price-ticker-track" id="priceTickerTrack">
+    <div class="ticker-item"><span class="ticker-rank">#1</span><span class="ticker-symbol">BTC</span><span class="ticker-price">LOADING...</span></div>
+  </div>
+</div>
+
 <!-- NAV -->
 <nav>
   <a href="index.html" class="nav-logo">
@@ -492,12 +773,10 @@
   <img class="hero-img" src="2215.jpg" alt="Crypto Intelligence Feed" />
   <div class="hero-grid"></div>
   <div class="hero-vignette"></div>
-
   <div class="hero-live">
     <div class="hero-live-dot"></div>
     LIVE FEED
   </div>
-
   <div class="hero-content">
     <div class="hero-eyebrow">INTELLIGENCE FEED</div>
     <h1>CRYPTO<br/><em>SIGNAL</em></h1>
@@ -521,32 +800,86 @@
   <div class="filter-count">SHOWING <strong id="visibleCount">—</strong> DISPATCHES</div>
 </div>
 
-<!-- GRID -->
-<section class="news-section">
-  <div class="news-grid" id="newsGrid">
-    <div class="loading-state">
-      <div class="loader-ring"></div>
-      <div class="loading-label">ACQUIRING SIGNAL</div>
+<!-- MAIN LAYOUT -->
+<div class="main-layout">
+
+  <!-- NEWS -->
+  <section class="news-section">
+    <div class="news-grid" id="newsGrid">
+      <div class="loading-state">
+        <div class="loader-ring"></div>
+        <div class="loading-label">ACQUIRING SIGNAL</div>
+      </div>
     </div>
-  </div>
-</section>
+  </section>
+
+  <!-- HHT RADAR SIDEBAR -->
+  <aside class="radar-sidebar">
+
+    <div class="radar-header">
+      <div class="radar-title">HHT RADAR</div>
+      <div class="radar-refresh" id="radarRefresh">SYNC: —</div>
+    </div>
+
+    <!-- $HHT Token -->
+    <div class="radar-hht">
+      <div class="radar-section-label">◈ $HHT TOKEN</div>
+      <div class="hht-price-row">
+        <div class="hht-price-val" id="hhtPrice">LOADING...</div>
+        <div class="radar-coin-change change-up" id="hhtChange">—</div>
+      </div>
+      <div class="hht-stats-mini" id="hhtStats"></div>
+    </div>
+
+    <!-- AI Market Summary -->
+    <div class="radar-ai-summary">
+      <div class="radar-section-label">◈ AI MARKET BRIEF</div>
+      <div class="radar-ai-text" id="radarAiSummary">
+        <span class="card-ai-loading">ANALYZING MARKET...</span>
+      </div>
+    </div>
+
+    <!-- Fear & Greed -->
+    <div class="radar-fg">
+      <div class="radar-section-label">◈ FEAR & GREED INDEX</div>
+      <div class="fg-value">
+        <span id="fgValue">—</span>
+        <span id="fgLabel">LOADING</span>
+      </div>
+      <div class="fg-bar-wrap">
+        <div class="fg-bar-fill" id="fgBar" style="width:0%"></div>
+      </div>
+      <div class="fg-labels"><span>FEAR</span><span>NEUTRAL</span><span>GREED</span></div>
+    </div>
+
+    <!-- Trending Coins -->
+    <div class="radar-section">
+      <div class="radar-section-label">◈ TRENDING NOW</div>
+      <div id="radarTrending">
+        <div class="radar-loading">
+          <div class="loader-ring"></div>
+          <div class="loading-label" style="font-size:8px">SCANNING...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top Gainers -->
+    <div class="radar-section">
+      <div class="radar-section-label">◈ TOP GAINERS 24H</div>
+      <div id="radarGainers">
+        <div class="radar-loading">
+          <div class="loader-ring"></div>
+          <div class="loading-label" style="font-size:8px">SCANNING...</div>
+        </div>
+      </div>
+    </div>
+
+  </aside>
+</div>
 
 <!-- FOOTER -->
-<!-- FOOTER -->
-<div style="
-  position: relative; z-index: 5;
-  max-width: 1360px; margin: 0 auto;
-  padding: 0 48px 40px;
-">
-  <div style="
-    border-top: 1px solid rgba(255,255,255,0.06);
-    padding-top: 20px;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 9px; letter-spacing: 1.5px;
-    color: rgba(255,255,255,0.18);
-    line-height: 1.8;
-    text-align: center;
-  ">
+<div style="position:relative;z-index:5;max-width:1360px;margin:0 auto;padding:0 48px 40px;">
+  <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:20px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1.5px;color:rgba(255,255,255,0.18);line-height:1.8;text-align:center;">
     ⚠ The news displayed on this page is sourced from third-party providers (CryptoNews, Cointelegraph, Decrypt) and is provided for informational purposes only.<br/>
     Nothing on this page constitutes financial advice, investment advice, or a recommendation to buy or sell any asset. Always do your own research (DYOR). Crypto assets are highly volatile and speculative.
   </div>
@@ -563,8 +896,9 @@
 
 <script>
 let allNewsData = [];
+let aiSummaryCache = {};
 
-// Live clock
+// ── CLOCK ──
 function updateClock() {
   const now = new Date();
   document.getElementById('sysTime').textContent =
@@ -573,6 +907,7 @@ function updateClock() {
 updateClock();
 setInterval(updateClock, 1000);
 
+// ── NEWS FETCH ──
 async function fetchNews() {
   try {
     const res = await fetch('/.netlify/functions/crypto-news');
@@ -587,7 +922,6 @@ async function fetchNews() {
     document.getElementById('lastUpdated').textContent = 'SYNC: ' + timeStr;
     document.getElementById('heroUpdated').textContent = 'SYNCED ' + timeStr;
 
-    // Ticker from headlines
     const titles = data.news.map(n => n.title).join('   ·   ');
     document.getElementById('tickerText').textContent = titles + '   ·   ' + titles;
 
@@ -595,6 +929,7 @@ async function fetchNews() {
   } catch(e) { showError(); }
 }
 
+// ── RENDER NEWS ──
 function renderNews(items) {
   const grid = document.getElementById('newsGrid');
   document.getElementById('visibleCount').textContent = items.length;
@@ -609,7 +944,7 @@ function renderNews(items) {
 
   grid.innerHTML = items.map((item, i) => `
     <a class="news-card" href="${esc(item.link)}" target="_blank" rel="noopener"
-       style="animation-delay:${i * 0.06}s">
+       style="animation-delay:${i * 0.06}s" data-idx="${i}">
       <div class="card-img">
         ${item.image
           ? `<img src="${esc(item.image)}" alt="" loading="lazy"
@@ -617,12 +952,17 @@ function renderNews(items) {
           : ''}
         <div class="card-img-empty" ${item.image ? 'style="display:none"' : ''}>◈</div>
         <div class="card-badge">${esc(item.source).toUpperCase()}</div>
+        <div class="card-sentiment" id="sentiment-${i}"></div>
         <div class="card-num">${String(i + 1).padStart(2,'0')}</div>
       </div>
       <div class="card-body">
         <div class="card-time">${formatDate(item.pubDate)}</div>
         <div class="card-title">${esc(item.title)}</div>
         ${item.description ? `<div class="card-desc">${esc(item.description)}</div>` : ''}
+        <div class="card-ai-summary" id="ai-summary-${i}">
+          <div class="card-ai-label">AI BRIEF</div>
+          <span class="card-ai-loading">ANALYZING...</span>
+        </div>
         <div class="card-cta">
           <span>READ DISPATCH</span>
           <div class="card-arrow">→</div>
@@ -630,8 +970,237 @@ function renderNews(items) {
       </div>
     </a>
   `).join('');
+
+  // AI analyze first 6 articles
+  items.slice(0, 6).forEach((item, i) => analyzeArticle(item, i));
 }
 
+// ── AI ARTICLE ANALYSIS ──
+async function analyzeArticle(item, idx) {
+  const cacheKey = item.link || item.title;
+  if (aiSummaryCache[cacheKey]) {
+    applyAiResult(idx, aiSummaryCache[cacheKey]);
+    return;
+  }
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 120,
+        system: `You analyze crypto news headlines. Respond ONLY with JSON, no markdown, no explanation.
+Format: {"sentiment":"bullish"|"bearish"|"neutral","summary":"max 15 words summary of the news"}`,
+        messages: [{
+          role: 'user',
+          content: `Headline: ${item.title}\nDescription: ${item.description || ''}`
+        }]
+      })
+    });
+
+    const data = await res.json();
+    const text = data.content?.[0]?.text || '';
+    const parsed = JSON.parse(text.replace(/```json|```/g, '').trim());
+    aiSummaryCache[cacheKey] = parsed;
+    applyAiResult(idx, parsed);
+  } catch(e) {
+    // Silently fail — remove loading state
+    const el = document.getElementById(`ai-summary-${idx}`);
+    if (el) el.style.display = 'none';
+  }
+}
+
+function applyAiResult(idx, result) {
+  // Sentiment badge
+  const sentEl = document.getElementById(`sentiment-${idx}`);
+  if (sentEl) {
+    const map = {
+      bullish: { cls: 'sentiment-bullish', label: '▲ BULLISH' },
+      bearish: { cls: 'sentiment-bearish', label: '▼ BEARISH' },
+      neutral: { cls: 'sentiment-neutral', label: '◆ NEUTRAL' }
+    };
+    const s = map[result.sentiment] || map.neutral;
+    sentEl.className = `card-sentiment ${s.cls}`;
+    sentEl.textContent = s.label;
+  }
+
+  // AI summary
+  const sumEl = document.getElementById(`ai-summary-${idx}`);
+  if (sumEl && result.summary) {
+    sumEl.innerHTML = `<div class="card-ai-label">AI BRIEF</div>${esc(result.summary)}`;
+  }
+}
+
+// ── RADAR: COINGECKO TRENDING ──
+async function fetchRadar() {
+  try {
+    const [trendRes, fgRes] = await Promise.all([
+      fetch('https://api.coingecko.com/api/v3/search/trending'),
+      fetch('https://api.alternative.me/fng/')
+    ]);
+
+    if (trendRes.ok) {
+      const td = await trendRes.json();
+      renderTrending(td.coins?.slice(0, 6) || []);
+    }
+
+    if (fgRes.ok) {
+      const fg = await fgRes.json();
+      const val = parseInt(fg.data?.[0]?.value || 50);
+      const lbl = fg.data?.[0]?.value_classification || 'NEUTRAL';
+      document.getElementById('fgValue').textContent = val;
+      document.getElementById('fgLabel').textContent = lbl.toUpperCase();
+      document.getElementById('fgBar').style.width = val + '%';
+    }
+
+    // Top gainers from markets endpoint
+    const gainRes = await fetch(
+      'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=percent_change_24h_desc&per_page=5&page=1&sparkline=false&price_change_percentage=24h'
+    );
+    if (gainRes.ok) {
+      const gainers = await gainRes.json();
+      renderGainers(gainers);
+    }
+
+    const now = new Date();
+    document.getElementById('radarRefresh').textContent =
+      'SYNC: ' + now.toUTCString().slice(17,22) + ' UTC';
+
+    // AI market summary from trending data
+    fetchRadarAiSummary();
+
+  } catch(e) {
+    console.warn('Radar fetch error', e);
+  }
+
+  // HHT real price from DexScreener
+  fetchHHT();
+}
+
+async function fetchHHT() {
+  const CA = '4KrNyA5FpFGQj4jQZh1yKzBkobq7mGVftWYVWjfwpump';
+  try {
+    const res = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${CA}`);
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+
+    // Pick the pair with highest liquidity
+    const pairs = data.pairs || [];
+    if (!pairs.length) throw new Error('no pairs');
+    const pair = pairs.sort((a, b) => (b.liquidity?.usd || 0) - (a.liquidity?.usd || 0))[0];
+
+    const price = parseFloat(pair.priceUsd || 0);
+    const change = pair.priceChange?.h24 || 0;
+    const mcap = pair.marketCap || pair.fdv || 0;
+    const vol = pair.volume?.h24 || 0;
+    const liq = pair.liquidity?.usd || 0;
+
+    const priceStr = price < 0.001
+      ? '$' + price.toFixed(8)
+      : '$' + price.toFixed(6);
+
+    const changeStr = (change >= 0 ? '+' : '') + parseFloat(change).toFixed(2) + '%';
+    const changeClass = change >= 0 ? 'change-up' : 'change-down';
+
+    document.getElementById('hhtPrice').textContent = priceStr;
+    document.getElementById('hhtChange').className = `radar-coin-change ${changeClass}`;
+    document.getElementById('hhtChange').textContent = changeStr;
+
+    document.getElementById('hhtStats').innerHTML = `
+      <div class="hht-stat-row">MCap <span>${formatUsd(mcap)}</span></div>
+      <div class="hht-stat-row">Vol 24h <span>${formatUsd(vol)}</span></div>
+      <div class="hht-stat-row">Liquidity <span>${formatUsd(liq)}</span></div>
+    `;
+  } catch(e) {
+    document.getElementById('hhtPrice').textContent = 'N/A';
+    document.getElementById('hhtChange').textContent = '—';
+  }
+}
+
+function formatUsd(n) {
+  if (!n) return '$0';
+  if (n >= 1_000_000) return '$' + (n / 1_000_000).toFixed(2) + 'M';
+  if (n >= 1_000)     return '$' + (n / 1_000).toFixed(1) + 'K';
+  return '$' + n.toFixed(0);
+}
+
+function renderTrending(coins) {
+  const el = document.getElementById('radarTrending');
+  if (!coins.length) { el.innerHTML = '<div style="font-family:IBM Plex Mono;font-size:9px;color:var(--dim);padding:10px 0">NO DATA</div>'; return; }
+
+  el.innerHTML = coins.map((c, i) => {
+    const coin = c.item;
+    const change = coin.data?.price_change_percentage_24h?.usd;
+    const changeStr = change !== undefined
+      ? (change >= 0 ? '+' : '') + change.toFixed(1) + '%'
+      : '—';
+    const changeClass = change >= 0 ? 'change-up' : 'change-down';
+    return `
+      <div class="radar-coin-row">
+        <div class="radar-coin-rank">${i + 1}</div>
+        <div class="radar-coin-icon">
+          ${coin.small ? `<img src="${coin.small}" alt="">` : coin.symbol?.[0] || '?'}
+        </div>
+        <div class="radar-coin-info">
+          <div class="radar-coin-name">${esc(coin.name)}</div>
+          <div class="radar-coin-symbol">$${esc(coin.symbol)}</div>
+        </div>
+        <div class="radar-coin-change ${changeClass}">${changeStr}</div>
+      </div>`;
+  }).join('');
+}
+
+function renderGainers(coins) {
+  const el = document.getElementById('radarGainers');
+  if (!coins.length) { el.innerHTML = ''; return; }
+  el.innerHTML = coins.map((c, i) => {
+    const change = c.price_change_percentage_24h;
+    const changeStr = change !== undefined
+      ? (change >= 0 ? '+' : '') + change.toFixed(1) + '%'
+      : '—';
+    return `
+      <div class="radar-coin-row">
+        <div class="radar-coin-rank">${i + 1}</div>
+        <div class="radar-coin-icon">
+          ${c.image ? `<img src="${c.image}" alt="">` : c.symbol?.[0] || '?'}
+        </div>
+        <div class="radar-coin-info">
+          <div class="radar-coin-name">${esc(c.name)}</div>
+          <div class="radar-coin-symbol">$${esc(c.symbol?.toUpperCase())}</div>
+        </div>
+        <div class="radar-coin-change change-up">${changeStr}</div>
+      </div>`;
+  }).join('');
+}
+
+async function fetchRadarAiSummary() {
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 100,
+        system: 'You are a crypto market analyst. Write a 2-sentence market brief. Be direct, no disclaimers. Use simple language.',
+        messages: [{
+          role: 'user',
+          content: 'Give me a brief 2-sentence summary of current crypto market sentiment. Mention if meme coins are active.'
+        }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.[0]?.text || '';
+    if (text) {
+      document.getElementById('radarAiSummary').innerHTML =
+        text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    }
+  } catch(e) {
+    document.getElementById('radarAiSummary').textContent = 'Market data unavailable.';
+  }
+}
+
+// ── FILTER ──
 function filterNews(source, btn) {
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
@@ -639,6 +1208,7 @@ function filterNews(source, btn) {
   renderNews(filtered);
 }
 
+// ── ERROR ──
 function showError() {
   document.getElementById('newsGrid').innerHTML = `
     <div class="error-state">
@@ -683,31 +1253,54 @@ function toggleNav() {
   });
 }
 
-fetchNews();
-setInterval(fetchNews, 5 * 60 * 1000);
-</script>
+// ── PRICE TICKER (Top 10 by Market Cap) ──
+async function fetchPriceTicker() {
+  try {
+    const res = await fetch(
+      'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=10&page=1&sparkline=false&price_change_percentage=24h'
+    );
+    if (!res.ok) return;
+    const coins = await res.json();
+    buildTicker(coins);
+  } catch(e) { console.warn('Ticker fetch error', e); }
+}
 
-<!-- SENTINEL WIDGET -->
-<script>
-fetch("/sentinel-widget.html")
-  .then(r => r.text())
-  .then(html => {
-    const div = document.createElement('div');
-    div.innerHTML = html;
-    Array.from(div.childNodes).forEach(node => {
-      if (node.nodeName !== 'SCRIPT' && node.nodeName !== 'LINK') document.body.appendChild(node);
-    });
-    Array.from(div.querySelectorAll('link')).forEach(el => {
-      const link = document.createElement('link');
-      link.rel = el.rel; link.href = el.href;
-      document.head.appendChild(link);
-    });
-    Array.from(div.querySelectorAll('script')).forEach(old => {
-      const s = document.createElement('script');
-      s.textContent = old.textContent;
-      document.body.appendChild(s);
-    });
-  });
+function formatPrice(p) {
+  if (p >= 1000) return '$' + p.toLocaleString('en-US', {maximumFractionDigits: 0});
+  if (p >= 1)    return '$' + p.toFixed(2);
+  if (p >= 0.01) return '$' + p.toFixed(4);
+  return '$' + p.toFixed(6);
+}
+
+function buildTicker(coins) {
+  const track = document.getElementById('priceTickerTrack');
+  const items = coins.map((c, i) => {
+    const change = c.price_change_percentage_24h;
+    const changeStr = change !== undefined
+      ? (change >= 0 ? '+' : '') + change.toFixed(2) + '%'
+      : '—';
+    const cls = change >= 0 ? 'ticker-up' : 'ticker-down';
+    const arrow = change >= 0 ? '▲' : '▼';
+    return `<div class="ticker-item">
+      <span class="ticker-rank">#${i+1}</span>
+      ${c.image ? `<img class="ticker-icon" src="${c.image}" alt="">` : ''}
+      <span class="ticker-symbol">${esc(c.symbol.toUpperCase())}</span>
+      <span class="ticker-price">${formatPrice(c.current_price)}</span>
+      <span class="ticker-change ${cls}">${arrow} ${changeStr}</span>
+    </div>`;
+  }).join('');
+  // Duplicate for seamless loop
+  track.innerHTML = items + items;
+}
+
+// ── INIT ──
+fetchNews();
+fetchRadar();
+fetchPriceTicker();
+setInterval(fetchNews, 5 * 60 * 1000);
+setInterval(fetchRadar, 5 * 60 * 1000);
+setInterval(fetchPriceTicker, 60 * 1000);
+setInterval(fetchHHT, 60 * 1000);
 </script>
 </body>
 </html>
