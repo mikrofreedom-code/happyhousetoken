@@ -418,7 +418,7 @@
     }
     .card-time {
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 9px; letter-spacing: 2px; color: var(--dim);
+      font-size: 10px; letter-spacing: 2px; color: rgba(255,255,255,0.5);
     }
     .card-title {
       font-family: 'Syne', sans-serif;
@@ -426,22 +426,22 @@
       line-height: 1.45; color: var(--white);
     }
     .card-desc {
-      font-size: 11px; font-weight: 400;
-      color: var(--off); line-height: 1.7; flex: 1;
+      font-size: 13px; font-weight: 400;
+      color: rgba(255,255,255,0.75); line-height: 1.7; flex: 1;
     }
 
     /* ── AI SUMMARY ── */
     .card-ai-summary {
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 10px; line-height: 1.6;
-      color: rgba(255,255,255,0.4);
-      border-left: 1px solid rgba(255,255,255,0.12);
+      font-size: 11px; line-height: 1.6;
+      color: rgba(255,255,255,0.65);
+      border-left: 1px solid rgba(255,255,255,0.2);
       padding-left: 10px;
       margin-top: 2px;
     }
     .card-ai-label {
-      font-size: 8px; letter-spacing: 2px;
-      color: rgba(255,255,255,0.2);
+      font-size: 9px; letter-spacing: 2px;
+      color: rgba(255,255,255,0.45);
       margin-bottom: 3px;
     }
     .card-ai-loading {
@@ -559,13 +559,13 @@
     }
     .radar-section-label {
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 8px; letter-spacing: 3px; color: var(--dim);
+      font-size: 9px; letter-spacing: 3px; color: rgba(255,255,255,0.5);
       margin-bottom: 10px;
     }
     .radar-ai-text {
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 10px; line-height: 1.7;
-      color: rgba(255,255,255,0.5);
+      font-size: 11px; line-height: 1.7;
+      color: rgba(255,255,255,0.7);
     }
     .radar-ai-text strong { color: var(--white); }
 
@@ -598,16 +598,16 @@
     .radar-coin-info { flex: 1; min-width: 0; }
     .radar-coin-name {
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 10px; color: var(--white);
+      font-size: 11px; color: var(--white);
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
     .radar-coin-symbol {
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 8px; color: var(--dim); letter-spacing: 1px;
+      font-size: 9px; color: rgba(255,255,255,0.45); letter-spacing: 1px;
     }
     .radar-coin-change {
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 10px; font-weight: 500;
+      font-size: 11px; font-weight: 700;
       flex-shrink: 0;
     }
     .change-up { color: #00ff64; }
@@ -636,7 +636,7 @@
       display: flex; justify-content: space-between;
       margin-top: 6px;
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 8px; color: var(--dim); letter-spacing: 1px;
+      font-size: 9px; color: rgba(255,255,255,0.45); letter-spacing: 1px;
     }
     .fg-value {
       font-family: 'IBM Plex Mono', monospace;
@@ -670,9 +670,9 @@
     .hht-stat-row {
       display: flex; justify-content: space-between;
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 8px; color: var(--dim); letter-spacing: 1px;
+      font-size: 10px; color: rgba(255,255,255,0.5); letter-spacing: 1px;
     }
-    .hht-stat-row span { color: rgba(255,255,255,0.6); }
+    .hht-stat-row span { color: rgba(255,255,255,0.85); }
 
     /* Radar loading */
     .radar-loading {
@@ -1159,22 +1159,17 @@ async function fetchRadar() {
 }
 
 async function fetchHHT() {
-  const CA = '4KrNyA5FpFGQj4jQZh1yKzBkobq7mGVftWYVWjfwpump';
   try {
-    const res = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${CA}`);
-    if (!res.ok) throw new Error();
+    const res = await fetch('/.netlify/functions/ai-analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'hht-price' })
+    });
     const data = await res.json();
+    if (data.error || !data.price) throw new Error();
 
-    // Pick the pair with highest liquidity
-    const pairs = data.pairs || [];
-    if (!pairs.length) throw new Error('no pairs');
-    const pair = pairs.sort((a, b) => (b.liquidity?.usd || 0) - (a.liquidity?.usd || 0))[0];
-
-    const price = parseFloat(pair.priceUsd || 0);
-    const change = pair.priceChange?.h24 || 0;
-    const mcap = pair.marketCap || pair.fdv || 0;
-    const vol = pair.volume?.h24 || 0;
-    const liq = pair.liquidity?.usd || 0;
+    const price = parseFloat(data.price);
+    const change = data.change || 0;
 
     const priceStr = price < 0.001
       ? '$' + price.toFixed(8)
@@ -1188,9 +1183,9 @@ async function fetchHHT() {
     document.getElementById('hhtChange').textContent = changeStr;
 
     document.getElementById('hhtStats').innerHTML = `
-      <div class="hht-stat-row">MCap <span>${formatUsd(mcap)}</span></div>
-      <div class="hht-stat-row">Vol 24h <span>${formatUsd(vol)}</span></div>
-      <div class="hht-stat-row">Liquidity <span>${formatUsd(liq)}</span></div>
+      <div class="hht-stat-row">MCap <span>${formatUsd(data.mcap)}</span></div>
+      <div class="hht-stat-row">Vol 24h <span>${formatUsd(data.vol)}</span></div>
+      <div class="hht-stat-row">Liquidity <span>${formatUsd(data.liq)}</span></div>
     `;
   } catch(e) {
     document.getElementById('hhtPrice').textContent = 'N/A';
