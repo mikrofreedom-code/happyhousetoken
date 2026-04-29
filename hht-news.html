@@ -387,31 +387,6 @@
       letter-spacing: -1px;
     }
 
-    /* ── SENTIMENT BADGE ── */
-    .card-sentiment {
-      position: absolute; top: 10px; right: 10px;
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 8px; letter-spacing: 1px;
-      padding: 3px 8px;
-      backdrop-filter: blur(6px);
-      border-radius: 1px;
-    }
-    .sentiment-bullish {
-      background: rgba(0,255,100,0.15);
-      border: 1px solid rgba(0,255,100,0.4);
-      color: #00ff64;
-    }
-    .sentiment-bearish {
-      background: rgba(255,60,60,0.15);
-      border: 1px solid rgba(255,60,60,0.4);
-      color: #ff5555;
-    }
-    .sentiment-neutral {
-      background: rgba(255,200,0,0.12);
-      border: 1px solid rgba(255,200,0,0.35);
-      color: #ffc800;
-    }
-
     .card-body {
       padding: 20px; flex: 1;
       display: flex; flex-direction: column; gap: 9px;
@@ -428,27 +403,6 @@
     .card-desc {
       font-size: 13px; font-weight: 400;
       color: rgba(255,255,255,0.75); line-height: 1.7; flex: 1;
-    }
-
-    /* ── AI SUMMARY ── */
-    .card-ai-summary {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 11px; line-height: 1.6;
-      color: rgba(255,255,255,0.65);
-      border-left: 1px solid rgba(255,255,255,0.2);
-      padding-left: 10px;
-      margin-top: 2px;
-    }
-    .card-ai-label {
-      font-size: 9px; letter-spacing: 2px;
-      color: rgba(255,255,255,0.45);
-      margin-bottom: 3px;
-    }
-    .card-ai-loading {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 9px; color: rgba(255,255,255,0.2);
-      letter-spacing: 2px;
-      animation: blink 1.5s infinite;
     }
 
     .card-cta {
@@ -649,30 +603,38 @@
       font-size: 9px; letter-spacing: 3px; color: var(--dim);
     }
 
-    /* HHT price */
-    .radar-hht {
+    /* Market stats */
+    .radar-market-stats {
       padding: 14px 20px;
       border-bottom: 1px solid var(--line);
-      background: rgba(255,255,255,0.015);
+      display: flex; flex-direction: column; gap: 8px;
     }
-    .hht-price-row {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-top: 10px;
-    }
-    .hht-price-val {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 16px; color: var(--white);
-    }
-    .hht-stats-mini {
-      display: flex; flex-direction: column; gap: 3px;
-      margin-top: 8px;
-    }
-    .hht-stat-row {
-      display: flex; justify-content: space-between;
+    .market-stat-row {
+      display: flex; justify-content: space-between; align-items: center;
       font-family: 'IBM Plex Mono', monospace;
       font-size: 10px; color: rgba(255,255,255,0.5); letter-spacing: 1px;
     }
-    .hht-stat-row span { color: rgba(255,255,255,0.85); }
+    .market-stat-row .stat-val { color: var(--white); font-size: 12px; }
+    .market-stat-row .stat-change { font-size: 10px; }
+
+    /* Community links */
+    .radar-community {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--line);
+    }
+    .community-links { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+    .community-link {
+      display: flex; align-items: center; justify-content: space-between;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px; letter-spacing: 1px;
+      color: rgba(255,255,255,0.6);
+      text-decoration: none;
+      padding: 7px 10px;
+      border: 1px solid rgba(255,255,255,0.07);
+      transition: all 0.2s;
+    }
+    .community-link:hover { color: var(--white); border-color: rgba(255,255,255,0.25); background: var(--mark); }
+    .community-link-arrow { font-size: 10px; opacity: 0.4; }
 
     /* Radar loading */
     .radar-loading {
@@ -909,14 +871,27 @@
       <div class="radar-refresh" id="radarRefresh">SYNC: —</div>
     </div>
 
-    <!-- $HHT Token -->
-    <div class="radar-hht">
-      <div class="radar-section-label">◈ $HHT TOKEN</div>
-      <div class="hht-price-row">
-        <div class="hht-price-val" id="hhtPrice">LOADING...</div>
-        <div class="radar-coin-change change-up" id="hhtChange">—</div>
+    <!-- Market Stats -->
+    <div class="radar-market-stats">
+      <div class="radar-section-label">◈ MARKET STATS</div>
+      <div class="market-stat-row">
+        <span>BTC DOM</span>
+        <span class="stat-val" id="btcDom">—</span>
       </div>
-      <div class="hht-stats-mini" id="hhtStats"></div>
+      <div class="market-stat-row">
+        <span>BTC</span>
+        <span style="display:flex;gap:8px;align-items:center">
+          <span class="stat-val" id="btcPrice">—</span>
+          <span class="stat-change radar-coin-change" id="btcChange">—</span>
+        </span>
+      </div>
+      <div class="market-stat-row">
+        <span>SOL</span>
+        <span style="display:flex;gap:8px;align-items:center">
+          <span class="stat-val" id="solPrice">—</span>
+          <span class="stat-change radar-coin-change" id="solChange">—</span>
+        </span>
+      </div>
     </div>
 
     <!-- AI Market Summary -->
@@ -962,6 +937,36 @@
       </div>
     </div>
 
+    <!-- Top Losers -->
+    <div class="radar-section">
+      <div class="radar-section-label">◈ TOP LOSERS 24H</div>
+      <div id="radarLosers">
+        <div class="radar-loading">
+          <div class="loader-ring"></div>
+          <div class="loading-label" style="font-size:8px">SCANNING...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Community Links -->
+    <div class="radar-community">
+      <div class="radar-section-label">◈ $HHT LINKS</div>
+      <div class="community-links">
+        <a class="community-link" href="https://t.me/HappyHouseToken" target="_blank" rel="noopener">
+          <span>TELEGRAM</span><span class="community-link-arrow">→</span>
+        </a>
+        <a class="community-link" href="https://jup.ag/swap/SOL-4KrNyA5FpFGQj4jQZh1yKzBkobq7mGVftWYVWjfwpump" target="_blank" rel="noopener">
+          <span>BUY ON JUPITER</span><span class="community-link-arrow">→</span>
+        </a>
+        <a class="community-link" href="https://dexscreener.com/solana/4KrNyA5FpFGQj4jQZh1yKzBkobq7mGVftWYVWjfwpump" target="_blank" rel="noopener">
+          <span>DEXSCREENER</span><span class="community-link-arrow">→</span>
+        </a>
+        <a class="community-link" href="https://twitter.com/HappyHouseToken" target="_blank" rel="noopener">
+          <span>TWITTER / X</span><span class="community-link-arrow">→</span>
+        </a>
+      </div>
+    </div>
+
   </aside>
 </div>
 
@@ -984,7 +989,6 @@
 
 <script>
 let allNewsData = [];
-let aiSummaryCache = {};
 
 // ── CLOCK ──
 function updateClock() {
@@ -1040,17 +1044,12 @@ function renderNews(items) {
           : ''}
         <div class="card-img-empty" ${item.image ? 'style="display:none"' : ''}>◈</div>
         <div class="card-badge">${esc(item.source).toUpperCase()}</div>
-        <div class="card-sentiment" id="sentiment-${i}"></div>
         <div class="card-num">${String(i + 1).padStart(2,'0')}</div>
       </div>
       <div class="card-body">
         <div class="card-time">${formatDate(item.pubDate)}</div>
         <div class="card-title">${esc(item.title)}</div>
         ${item.description ? `<div class="card-desc">${esc(item.description)}</div>` : ''}
-        <div class="card-ai-summary" id="ai-summary-${i}">
-          <div class="card-ai-label">AI BRIEF</div>
-          <span class="card-ai-loading">ANALYZING...</span>
-        </div>
         <div class="card-cta">
           <span>READ DISPATCH</span>
           <div class="card-arrow">→</div>
@@ -1058,59 +1057,9 @@ function renderNews(items) {
       </div>
     </a>
   `).join('');
-
-  // AI analyze first 6 articles
-  items.slice(0, 6).forEach((item, i) => analyzeArticle(item, i));
 }
 
-// ── AI ARTICLE ANALYSIS ──
-async function analyzeArticle(item, idx) {
-  const cacheKey = item.link || item.title;
-  if (aiSummaryCache[cacheKey]) {
-    applyAiResult(idx, aiSummaryCache[cacheKey]);
-    return;
-  }
 
-  try {
-    const res = await fetch('/.netlify/functions/ai-analyze', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        type: 'article',
-        title: item.title,
-        description: item.description || ''
-      })
-    });
-
-    const parsed = await res.json();
-    aiSummaryCache[cacheKey] = parsed;
-    applyAiResult(idx, parsed);
-  } catch(e) {
-    const el = document.getElementById(`ai-summary-${idx}`);
-    if (el) el.style.display = 'none';
-  }
-}
-
-function applyAiResult(idx, result) {
-  // Sentiment badge
-  const sentEl = document.getElementById(`sentiment-${idx}`);
-  if (sentEl) {
-    const map = {
-      bullish: { cls: 'sentiment-bullish', label: '▲ BULLISH' },
-      bearish: { cls: 'sentiment-bearish', label: '▼ BEARISH' },
-      neutral: { cls: 'sentiment-neutral', label: '◆ NEUTRAL' }
-    };
-    const s = map[result.sentiment] || map.neutral;
-    sentEl.className = `card-sentiment ${s.cls}`;
-    sentEl.textContent = s.label;
-  }
-
-  // AI summary
-  const sumEl = document.getElementById(`ai-summary-${idx}`);
-  if (sumEl && result.summary) {
-    sumEl.innerHTML = `<div class="card-ai-label">AI BRIEF</div>${esc(result.summary)}`;
-  }
-}
 
 // ── RADAR: COINGECKO TRENDING ──
 async function fetchRadar() {
@@ -1134,70 +1083,69 @@ async function fetchRadar() {
       document.getElementById('fgBar').style.width = val + '%';
     }
 
-    // Top gainers from markets endpoint
-    const gainRes = await fetch(
-      'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=percent_change_24h_desc&per_page=5&page=1&sparkline=false&price_change_percentage=24h'
+    // Fetch top 250 coins, then sort by 24h change for real gainers/losers
+    const marketsRes = await fetch(
+      'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1&sparkline=false&price_change_percentage=24h'
     );
-    if (gainRes.ok) {
-      const gainers = await gainRes.json();
-      renderGainers(gainers);
+    if (marketsRes.ok) {
+      const allCoins = await marketsRes.json();
+      const sorted = [...allCoins]
+        .filter(c => c.price_change_percentage_24h !== null)
+        .sort((a, b) => b.price_change_percentage_24h - a.price_change_percentage_24h);
+      renderGainers(sorted.slice(0, 5));
+      renderLosers(sorted.slice(-5).reverse());
     }
 
     const now = new Date();
     document.getElementById('radarRefresh').textContent =
       'SYNC: ' + now.toUTCString().slice(17,22) + ' UTC';
 
-    // AI market summary from trending data
+    // AI market summary + market stats
     fetchRadarAiSummary();
+    fetchMarketStats();
 
   } catch(e) {
     console.warn('Radar fetch error', e);
+    fetchMarketStats();
   }
-
-  // HHT real price from DexScreener
-  fetchHHT();
 }
 
-async function fetchHHT() {
+async function fetchMarketStats() {
   try {
-    const res = await fetch('/.netlify/functions/ai-analyze', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'hht-price' })
-    });
-    const data = await res.json();
-    if (data.error || !data.price) throw new Error();
+    // BTC dominance from global endpoint
+    const globalRes = await fetch('https://api.coingecko.com/api/v3/global');
+    if (globalRes.ok) {
+      const g = await globalRes.json();
+      const dom = g.data?.market_cap_percentage?.btc;
+      if (dom !== undefined) {
+        document.getElementById('btcDom').textContent = dom.toFixed(1) + '%';
+      }
+    }
+  } catch(e) { console.warn('Global fetch error', e); }
 
-    const price = parseFloat(data.price);
-    const change = data.change || 0;
-
-    const priceStr = price < 0.001
-      ? '$' + price.toFixed(8)
-      : '$' + price.toFixed(6);
-
-    const changeStr = (change >= 0 ? '+' : '') + parseFloat(change).toFixed(2) + '%';
-    const changeClass = change >= 0 ? 'change-up' : 'change-down';
-
-    document.getElementById('hhtPrice').textContent = priceStr;
-    document.getElementById('hhtChange').className = `radar-coin-change ${changeClass}`;
-    document.getElementById('hhtChange').textContent = changeStr;
-
-    document.getElementById('hhtStats').innerHTML = `
-      <div class="hht-stat-row">MCap <span>${formatUsd(data.mcap)}</span></div>
-      <div class="hht-stat-row">Vol 24h <span>${formatUsd(data.vol)}</span></div>
-      <div class="hht-stat-row">Liquidity <span>${formatUsd(data.liq)}</span></div>
-    `;
-  } catch(e) {
-    document.getElementById('hhtPrice').textContent = 'N/A';
-    document.getElementById('hhtChange').textContent = '—';
-  }
-}
-
-function formatUsd(n) {
-  if (!n) return '$0';
-  if (n >= 1_000_000) return '$' + (n / 1_000_000).toFixed(2) + 'M';
-  if (n >= 1_000)     return '$' + (n / 1_000).toFixed(1) + 'K';
-  return '$' + n.toFixed(0);
+  try {
+    // BTC + SOL prices
+    const priceRes = await fetch(
+      'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,solana&vs_currencies=usd&include_24hr_change=true'
+    );
+    if (priceRes.ok) {
+      const p = await priceRes.json();
+      if (p.bitcoin) {
+        document.getElementById('btcPrice').textContent = '$' + p.bitcoin.usd.toLocaleString('en-US', {maximumFractionDigits: 0});
+        const btcCh = p.bitcoin.usd_24h_change;
+        const btcChEl = document.getElementById('btcChange');
+        btcChEl.textContent = (btcCh >= 0 ? '+' : '') + btcCh.toFixed(2) + '%';
+        btcChEl.className = 'stat-change radar-coin-change ' + (btcCh >= 0 ? 'change-up' : 'change-down');
+      }
+      if (p.solana) {
+        document.getElementById('solPrice').textContent = '$' + p.solana.usd.toFixed(2);
+        const solCh = p.solana.usd_24h_change;
+        const solChEl = document.getElementById('solChange');
+        solChEl.textContent = (solCh >= 0 ? '+' : '') + solCh.toFixed(2) + '%';
+        solChEl.className = 'stat-change radar-coin-change ' + (solCh >= 0 ? 'change-up' : 'change-down');
+      }
+    }
+  } catch(e) { console.warn('Price fetch error', e); }
 }
 
 function renderTrending(coins) {
@@ -1245,6 +1193,29 @@ function renderGainers(coins) {
           <div class="radar-coin-symbol">$${esc(c.symbol?.toUpperCase())}</div>
         </div>
         <div class="radar-coin-change change-up">${changeStr}</div>
+      </div>`;
+  }).join('');
+}
+
+function renderLosers(coins) {
+  const el = document.getElementById('radarLosers');
+  if (!coins.length) { el.innerHTML = ''; return; }
+  el.innerHTML = coins.map((c, i) => {
+    const change = c.price_change_percentage_24h;
+    const changeStr = change !== undefined
+      ? (change >= 0 ? '+' : '') + change.toFixed(1) + '%'
+      : '—';
+    return `
+      <div class="radar-coin-row">
+        <div class="radar-coin-rank">${i + 1}</div>
+        <div class="radar-coin-icon">
+          ${c.image ? `<img src="${c.image}" alt="">` : c.symbol?.[0] || '?'}
+        </div>
+        <div class="radar-coin-info">
+          <div class="radar-coin-name">${esc(c.name)}</div>
+          <div class="radar-coin-symbol">$${esc(c.symbol?.toUpperCase())}</div>
+        </div>
+        <div class="radar-coin-change change-down">${changeStr}</div>
       </div>`;
   }).join('');
 }
@@ -1366,7 +1337,7 @@ fetchPriceTicker();
 setInterval(fetchNews, 5 * 60 * 1000);
 setInterval(fetchRadar, 5 * 60 * 1000);
 setInterval(fetchPriceTicker, 60 * 1000);
-setInterval(fetchHHT, 60 * 1000);
+setInterval(fetchMarketStats, 60 * 1000);
 </script>
 
 <!-- HHT SENTINEL -->

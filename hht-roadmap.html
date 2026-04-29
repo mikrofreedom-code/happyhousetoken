@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HappyHouseToken — Roadmap & Whitepaper</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Exo+2:wght@300;400;500;600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+/* =============================================
+   RESET & BASE
+   ============================================= */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; overflow-x:hidden; }
+body { font-family:'Exo 2',sans-serif; background:#0a0010; color:#e0d0ff; overflow-x:hidden; }
+
+:root {
+  --cyan:#00f0ff;
+  --pink:#ff1aaa;
+  --orange:#ff7800;
+  --yellow:#ffe900;
+  --green:#3dff00;
+  --purple:#cc00ff;
+  --dark:#0a0010;
+  --dark2:#110016;
+  --card:rgba(0,240,255,0.04);
+  --border:rgba(0,240,255,0.15);
+  --text:#e0d0ff;
+  --muted:#8870aa;
+}
+
+/* NOISE + SCANLINES */
+body::after {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:1; opacity:0.3;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+}
+body::before {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:2;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.06) 3px,rgba(0,0,0,0.06) 4px);
+}
+
+/* =============================================
+   LIVE BANNER
+   ============================================= */
+#live-banner {
+  position:fixed; top:0; left:0; right:0; height:40px;
+  background:rgba(8,0,18,0.97);
+  border-bottom:2px solid var(--pink);
+  box-shadow:0 0 28px rgba(255,26,170,0.4);
+  display:flex; align-items:center; justify-content:center; gap:14px;
+  z-index:9100;
+}
+#live-banner .dot {
+  width:9px; height:9px; border-radius:50%;
+  background:var(--green); box-shadow:0 0 10px var(--green),0 0 22px var(--green);
+  animation:dot-pulse 1.2s ease-in-out infinite;
+}
+@keyframes dot-pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.2;transform:scale(.6)} }
+#live-banner .txt {
+  font-family:'Share Tech Mono',monospace; font-size:0.95rem;
+  letter-spacing:4px; color:var(--cyan); text-transform:uppercase;
+  text-shadow:0 0 14px var(--cyan);
+}
+
+/* =============================================
+   NAV
+   ============================================= */
+#topnav {
+  position:fixed; top:40px; left:0; right:0; z-index:9000;
+  height:60px; padding:0 40px;
+  display:flex; align-items:center; justify-content:space-between; gap:16px;
+  background:rgba(8,0,20,0.97);
+  border-bottom:1px solid rgba(0,240,255,0.2);
+  box-shadow:0 0 20px rgba(0,240,255,0.06);
+}
+#nav-logo {
+  font-family:'Orbitron',sans-serif; font-size:1.05rem; font-weight:700;
+  color:var(--cyan); text-decoration:none;
+  display:flex; align-items:center; gap:8px; flex-shrink:0;
+  text-shadow:0 0 10px rgba(0,240,255,0.4);
+}
+#nav-logo img { height:34px; width:auto; }
+#nav-back {
+  font-family:'Share Tech Mono',monospace; font-size:0.78rem;
+  color:var(--muted); text-decoration:none; letter-spacing:2px;
+  text-transform:uppercase; transition:color 0.2s;
+  display:flex; align-items:center; gap:8px;
+  border:1px solid rgba(0,240,255,0.15); padding:8px 16px; border-radius:4px;
+}
+#nav-back:hover { color:var(--cyan); border-color:var(--cyan); }
+#nav-menu {
+  display:flex; gap:24px; list-style:none; align-items:center;
+}
+#nav-menu li a {
+  font-family:'Exo 2',sans-serif; font-size:0.82rem; font-weight:500;
+  color:var(--muted); text-decoration:none; letter-spacing:1px;
+  text-transform:uppercase; transition:color 0.2s; white-space:nowrap;
+}
+#nav-menu li a:hover { color:var(--cyan); }
+#nav-menu li a.active { color:var(--cyan); text-shadow:0 0 8px rgba(0,240,255,0.4); }
+
+/* Burger */
+#burger {
+  display:none; flex-direction:column; gap:5px;
+  background:none; border:none; cursor:pointer; padding:8px; flex-shrink:0;
+}
+#burger span { display:block; width:24px; height:3px; background:var(--cyan); border-radius:3px; }
+
+/* Mobile Drawer */
+#drawer {
+  display:none; position:fixed; top:0; right:0;
+  width:260px; height:100%;
+  background:#08001a;
+  border-left:2px solid var(--cyan);
+  box-shadow:-4px 0 30px rgba(0,240,255,0.15);
+  z-index:9100; overflow-y:auto; padding:80px 0 40px;
+}
+#drawer a {
+  display:block; padding:16px 24px;
+  font-family:'Exo 2',sans-serif; font-size:1rem; font-weight:700;
+  color:#e0d0ff; text-decoration:none;
+  border-bottom:1px solid #1a0030; letter-spacing:1px;
+}
+#drawer a:active { background:rgba(0,240,255,0.08); color:var(--cyan); }
+#dimmer {
+  display:none; position:fixed; inset:0;
+  background:rgba(0,0,0,0.65); z-index:9050;
+}
+
+/* =============================================
+   REVEAL
+   ============================================= */
+.reveal { opacity:0; transform:translateY(30px); transition:opacity 0.7s ease,transform 0.7s ease; }
+.reveal.visible { opacity:1; transform:translateY(0); }
+
+/* =============================================
+   PAGE HERO
+   ============================================= */
+.page-hero {
+  min-height:55vh;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  position:relative; overflow:hidden;
+  padding:160px 24px 80px; text-align:center;
+}
+.page-hero-grid {
+  position:absolute; inset:0; pointer-events:none;
+  background-image:
+    linear-gradient(rgba(0,240,255,0.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,240,255,0.04) 1px,transparent 1px);
+  background-size:60px 60px;
+  animation:grid-move 20s linear infinite;
+}
+@keyframes grid-move { 0%{transform:translateY(0)} 100%{transform:translateY(60px)} }
+.page-hero::before {
+  content:''; position:absolute; top:50%; left:50%;
+  transform:translate(-50%,-50%); pointer-events:none;
+  width:800px; height:500px;
+  background:
+    radial-gradient(ellipse 50% 60% at 30% 50%,rgba(255,26,170,0.12) 0%,transparent 70%),
+    radial-gradient(ellipse 50% 60% at 70% 50%,rgba(0,240,255,0.1) 0%,transparent 70%),
+    radial-gradient(ellipse 40% 50% at 50% 60%,rgba(255,120,0,0.08) 0%,transparent 70%);
+}
+.page-hero-eyebrow {
+  font-family:'Share Tech Mono',monospace; font-size:0.78rem;
+  color:var(--cyan); letter-spacing:5px; text-transform:uppercase;
+  margin-bottom:20px; position:relative; z-index:1;
+  text-shadow:0 0 10px rgba(0,240,255,0.5);
+}
+.page-hero-title {
+  font-family:'Orbitron',sans-serif;
+  font-size:clamp(2.8rem,8vw,7rem);
+  font-weight:900; line-height:0.9;
+  position:relative; z-index:1; margin-bottom:28px;
+}
+.page-hero-title .t1 {
+  display:block;
+  background:linear-gradient(135deg,#fff 0%,var(--cyan) 40%,var(--pink) 80%,var(--orange) 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  filter:drop-shadow(0 0 20px rgba(0,240,255,0.3));
+}
+.page-hero-title .t2 {
+  display:block; color:transparent;
+  -webkit-text-stroke:1px rgba(255,26,170,0.4);
+  font-size:0.55em; letter-spacing:10px; margin-top:8px;
+}
+.page-hero-sub {
+  font-family:'Share Tech Mono',monospace; font-size:0.85rem;
+  color:var(--muted); letter-spacing:2px; position:relative; z-index:1;
+  max-width:500px;
+}
+
+/* Tab nav */
+.tab-nav {
+  display:flex; align-items:center; justify-content:center; gap:0;
+  margin-top:40px; position:relative; z-index:1;
+  border:1px solid rgba(0,240,255,0.2); border-radius:6px; overflow:hidden;
+}
+.tab-btn {
+  font-family:'Orbitron',sans-serif; font-size:0.78rem; font-weight:700;
+  letter-spacing:3px; text-transform:uppercase; padding:14px 36px;
+  background:transparent; color:var(--muted); border:none; cursor:pointer;
+  transition:all 0.25s; white-space:nowrap;
+}
+.tab-btn.active {
+  background:rgba(0,240,255,0.12); color:var(--cyan);
+  text-shadow:0 0 10px rgba(0,240,255,0.5);
+  box-shadow:inset 0 0 20px rgba(0,240,255,0.06);
+}
+.tab-btn:hover:not(.active) { color:var(--text); background:rgba(255,255,255,0.03); }
+.tab-divider { width:1px; background:rgba(0,240,255,0.2); align-self:stretch; }
+
+/* =============================================
+   SECTION WRAPPER
+   ============================================= */
+.content-wrap { max-width:1100px; margin:0 auto; padding:0 40px; }
+
+/* =============================================
+   ROADMAP SECTION
+   ============================================= */
+#section-roadmap { padding:80px 0 120px; display:block; }
+#section-whitepaper { padding:80px 0 120px; display:none; }
+
+.section-eyebrow {
+  font-family:'Share Tech Mono',monospace; font-size:0.72rem;
+  color:var(--cyan); letter-spacing:5px; text-transform:uppercase;
+  margin-bottom:14px; display:block;
+  text-shadow:0 0 8px rgba(0,240,255,0.4);
+}
+.section-heading {
+  font-family:'Orbitron',sans-serif;
+  font-size:clamp(2rem,4vw,3.2rem);
+  font-weight:900; line-height:1.05;
+  color:var(--cyan); margin-bottom:60px;
+  text-shadow:0 0 20px rgba(0,240,255,0.2);
+}
+
+/* ---- Timeline ---- */
+.timeline {
+  position:relative;
+  padding-left:0;
+}
+.timeline::before {
+  content:'';
+  position:absolute; left:28px; top:0; bottom:0; width:2px;
+  background:linear-gradient(180deg,var(--cyan),var(--pink),var(--orange),rgba(0,240,255,0.1));
+}
+
+.tl-phase {
+  position:relative; padding-left:80px; margin-bottom:64px;
+}
+.tl-phase:last-child { margin-bottom:0; }
+
+/* dot */
+.tl-dot {
+  position:absolute; left:18px; top:6px;
+  width:22px; height:22px; border-radius:50%;
+  background:var(--dark);
+  border:2px solid var(--cyan);
+  box-shadow:0 0 14px var(--cyan), 0 0 30px rgba(0,240,255,0.3);
+  z-index:2;
+  display:flex; align-items:center; justify-content:center;
+}
+.tl-dot::after {
+  content:''; width:8px; height:8px; border-radius:50%;
+  background:var(--cyan);
+  box-shadow:0 0 8px var(--cyan);
+}
+.tl-dot.upcoming {
+  border-color:rgba(0,240,255,0.25);
+  box-shadow:none;
+}
+.tl-dot.upcoming::after {
+  background:rgba(0,240,255,0.25);
+  box-shadow:none;
+}
+.tl-dot.phase2 { border-color:var(--pink); box-shadow:0 0 14px var(--pink), 0 0 30px rgba(255,26,170,0.3); }
+.tl-dot.phase2::after { background:var(--pink); box-shadow:0 0 8px var(--pink); }
+.tl-dot.phase3 { border-color:var(--yellow); box-shadow:0 0 14px var(--yellow), 0 0 30px rgba(255,233,0,0.3); }
+.tl-dot.phase3::after { background:var(--yellow); box-shadow:0 0 8px var(--yellow); }
+.tl-dot.phase4 { border-color:var(--orange); box-shadow:0 0 14px var(--orange), 0 0 30px rgba(255,120,0,0.3); }
+.tl-dot.phase4::after { background:var(--orange); box-shadow:0 0 8px var(--orange); }
+
+.tl-phase-tag {
+  font-family:'Share Tech Mono',monospace; font-size:0.68rem;
+  letter-spacing:3px; text-transform:uppercase;
+  color:var(--cyan); margin-bottom:8px; display:block;
+}
+.tl-phase-tag.p2 { color:var(--pink); }
+.tl-phase-tag.p3 { color:var(--yellow); }
+.tl-phase-tag.p4 { color:var(--orange); }
+
+.tl-card {
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:12px; padding:32px 36px;
+  position:relative; overflow:hidden;
+  transition:border-color 0.3s, box-shadow 0.3s;
+}
+.tl-card::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:2px;
+  background:linear-gradient(90deg,var(--cyan),transparent);
+}
+.tl-card.p2::before { background:linear-gradient(90deg,var(--pink),transparent); }
+.tl-card.p3::before { background:linear-gradient(90deg,var(--yellow),transparent); }
+.tl-card.p4::before { background:linear-gradient(90deg,var(--orange),transparent); }
+.tl-card:hover { border-color:rgba(0,240,255,0.35); box-shadow:0 0 40px rgba(0,240,255,0.05); }
+.tl-card.p2:hover { border-color:rgba(255,26,170,0.35); box-shadow:0 0 40px rgba(255,26,170,0.05); }
+.tl-card.p3:hover { border-color:rgba(255,233,0,0.35); box-shadow:0 0 40px rgba(255,233,0,0.05); }
+.tl-card.p4:hover { border-color:rgba(255,120,0,0.35); box-shadow:0 0 40px rgba(255,120,0,0.05); }
+
+.tl-header {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:20px; flex-wrap:wrap; gap:12px;
+}
+.tl-title {
+  font-family:'Orbitron',sans-serif; font-size:1.5rem; font-weight:800;
+  color:var(--text);
+}
+.tl-badge {
+  font-family:'Share Tech Mono',monospace; font-size:0.65rem; letter-spacing:3px;
+  padding:5px 14px; border-radius:3px;
+  background:rgba(0,240,255,0.12); color:var(--cyan);
+  border:1px solid rgba(0,240,255,0.25);
+  text-transform:uppercase; white-space:nowrap;
+}
+.tl-badge.live {
+  background:rgba(61,255,0,0.1); color:var(--green);
+  border-color:rgba(61,255,0,0.3);
+  animation:badge-pulse 2s ease-in-out infinite;
+}
+@keyframes badge-pulse { 0%,100%{box-shadow:0 0 6px rgba(61,255,0,0.2)} 50%{box-shadow:0 0 16px rgba(61,255,0,0.5)} }
+
+.tl-items {
+  display:grid; grid-template-columns:1fr 1fr; gap:10px 20px;
+  list-style:none;
+}
+.tl-items li {
+  font-family:'Exo 2',sans-serif; font-size:0.9rem;
+  color:var(--muted); line-height:1.6;
+  padding-left:18px; position:relative;
+}
+.tl-items li::before {
+  content:''; position:absolute; left:0; top:9px;
+  width:6px; height:6px; border-radius:50%;
+  background:var(--cyan);
+}
+.tl-items li.done::before { background:var(--green); box-shadow:0 0 6px var(--green); }
+.tl-items li.done { color:var(--text); }
+
+.tl-target {
+  margin-top:20px; padding-top:20px;
+  border-top:1px solid rgba(0,240,255,0.08);
+  font-family:'Share Tech Mono',monospace; font-size:0.75rem;
+  color:var(--muted); letter-spacing:2px;
+  display:flex; align-items:center; gap:10px;
+}
+.tl-target span { color:var(--cyan); font-size:0.9rem; }
+
+/* Progress bar */
+.tl-progress { margin-top:16px; }
+.tl-progress-label {
+  display:flex; justify-content:space-between;
+  font-family:'Share Tech Mono',monospace; font-size:0.62rem;
+  color:var(--muted); letter-spacing:2px; margin-bottom:6px;
+}
+.tl-progress-bar {
+  height:4px; background:rgba(255,255,255,0.05); border-radius:2px; overflow:hidden;
+}
+.tl-progress-fill {
+  height:100%; border-radius:2px;
+  background:linear-gradient(90deg,var(--cyan),var(--pink));
+  transition:width 1.5s ease;
+}
+
+/* ---- Big Milestone ---- */
+.milestone-strip {
+  background:linear-gradient(90deg,rgba(0,240,255,0.06),rgba(255,26,170,0.04),rgba(255,120,0,0.04));
+  border:1px solid rgba(0,240,255,0.15);
+  border-radius:12px; padding:36px 40px;
+  margin:60px 0;
+  display:flex; align-items:center; justify-content:space-between; gap:30px;
+  flex-wrap:wrap;
+}
+.ms-left .ms-label {
+  font-family:'Share Tech Mono',monospace; font-size:0.65rem;
+  letter-spacing:4px; color:var(--muted); text-transform:uppercase; margin-bottom:8px;
+}
+.ms-left .ms-value {
+  font-family:'Orbitron',sans-serif; font-size:clamp(1.8rem,4vw,2.8rem);
+  font-weight:900; color:var(--yellow);
+  text-shadow:0 0 20px rgba(255,233,0,0.4);
+}
+.ms-right {
+  text-align:right;
+}
+.ms-right .ms-desc {
+  font-family:'Exo 2',sans-serif; font-size:1rem;
+  color:var(--muted); max-width:320px; line-height:1.6;
+}
+.ms-right .ms-desc span { color:var(--cyan); }
+
+/* Countdown inside milestone */
+.ms-countdown {
+  display:flex; align-items:center; gap:8px;
+  margin-top:16px;
+}
+.ms-cd-block { text-align:center; }
+.ms-cd-num {
+  font-family:'Orbitron',sans-serif; font-size:1.8rem; font-weight:900;
+  color:var(--cyan); display:block; line-height:1;
+  text-shadow:0 0 12px rgba(0,240,255,0.4);
+}
+.ms-cd-unit {
+  font-family:'Share Tech Mono',monospace; font-size:0.55rem;
+  color:var(--muted); letter-spacing:2px; text-transform:uppercase;
+}
+.ms-cd-sep {
+  font-family:'Orbitron',sans-serif; font-size:1.6rem; color:var(--pink);
+  align-self:flex-start; margin-top:2px;
+}
+
+/* =============================================
+   WHITEPAPER SECTION
+   ============================================= */
+.wp-hero-card {
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px; overflow:hidden;
+  margin-bottom:48px;
+  position:relative;
+}
+.wp-hero-card::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:3px;
+  background:linear-gradient(90deg,var(--cyan),var(--pink),var(--yellow),var(--orange));
+}
+.wp-hero-inner {
+  padding:48px; display:flex; gap:48px; align-items:flex-start;
+}
+.wp-doc-icon {
+  flex-shrink:0; width:80px; height:100px;
+  background:rgba(0,240,255,0.06); border:1px solid rgba(0,240,255,0.2);
+  border-radius:8px; display:flex; align-items:center; justify-content:center;
+  font-size:2.5rem; position:relative;
+}
+.wp-doc-icon::after {
+  content:''; position:absolute; top:-1px; right:-1px;
+  width:18px; height:18px;
+  background:#0a0010; border:1px solid rgba(0,240,255,0.2);
+  border-top:none; border-right:none;
+  clip-path:polygon(0 0,100% 100%,0 100%);
+}
+
+.wp-meta-row {
+  display:flex; flex-wrap:wrap; gap:10px; margin-bottom:24px;
+}
+.wp-meta-chip {
+  font-family:'Share Tech Mono',monospace; font-size:0.65rem;
+  letter-spacing:2px; color:var(--muted);
+  border:1px solid rgba(0,240,255,0.12); border-radius:3px; padding:5px 12px;
+}
+.wp-main-title {
+  font-family:'Orbitron',sans-serif; font-size:1.8rem; font-weight:900;
+  color:var(--text); line-height:1.1; margin-bottom:16px;
+}
+.wp-main-desc {
+  color:var(--muted); line-height:1.8; font-size:0.95rem; margin-bottom:28px;
+}
+
+/* Chapters grid */
+.wp-chapters-grid {
+  display:grid; grid-template-columns:repeat(2,1fr); gap:12px;
+  margin-bottom:32px;
+}
+.wp-chapter-card {
+  background:rgba(0,240,255,0.03); border:1px solid rgba(0,240,255,0.1);
+  border-radius:8px; padding:16px 20px;
+  display:flex; align-items:flex-start; gap:12px;
+  transition:border-color 0.2s, background 0.2s;
+  cursor:default;
+}
+.wp-chapter-card:hover { border-color:rgba(0,240,255,0.25); background:rgba(0,240,255,0.06); }
+.wp-ch-num {
+  font-family:'Orbitron',sans-serif; font-size:0.7rem; font-weight:800;
+  color:var(--cyan); opacity:0.5; flex-shrink:0; margin-top:2px;
+}
+.wp-ch-name {
+  font-family:'Exo 2',sans-serif; font-size:0.88rem; font-weight:600;
+  color:var(--text); line-height:1.3;
+}
+.wp-ch-sub {
+  font-family:'Share Tech Mono',monospace; font-size:0.6rem;
+  color:var(--muted); letter-spacing:1px; margin-top:4px;
+}
+
+.wp-download-row {
+  display:flex; gap:14px; flex-wrap:wrap; align-items:center;
+}
+.wp-btn-primary {
+  display:inline-flex; align-items:center; gap:10px;
+  background:var(--cyan); color:#000;
+  font-family:'Exo 2',sans-serif; font-weight:800; font-size:0.9rem;
+  padding:14px 28px; border-radius:4px; text-decoration:none;
+  letter-spacing:1px; text-transform:uppercase;
+  transition:transform 0.2s, box-shadow 0.2s;
+  box-shadow:0 0 20px rgba(0,240,255,0.3);
+}
+.wp-btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 30px rgba(0,240,255,0.5); }
+.wp-btn-secondary {
+  display:inline-flex; align-items:center; gap:10px;
+  background:transparent; color:var(--cyan);
+  font-family:'Exo 2',sans-serif; font-weight:600; font-size:0.9rem;
+  padding:14px 28px; border-radius:4px; text-decoration:none;
+  letter-spacing:1px; text-transform:uppercase;
+  border:1px solid rgba(0,240,255,0.35);
+  transition:all 0.2s;
+}
+.wp-btn-secondary:hover { background:rgba(0,240,255,0.08); border-color:var(--cyan); }
+
+/* Key facts */
+.wp-facts-grid {
+  display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:48px;
+}
+.wp-fact {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:10px; padding:24px 20px; text-align:center;
+}
+.wp-fact-val {
+  font-family:'Orbitron',sans-serif; font-size:1.5rem; font-weight:900;
+  color:var(--cyan); display:block; margin-bottom:6px;
+  text-shadow:0 0 12px rgba(0,240,255,0.3);
+}
+.wp-fact-lbl {
+  font-family:'Share Tech Mono',monospace; font-size:0.62rem;
+  color:var(--muted); letter-spacing:2px; text-transform:uppercase;
+}
+
+/* Excerpt sections */
+.wp-excerpt {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:12px; padding:36px; margin-bottom:20px;
+  position:relative; overflow:hidden;
+}
+.wp-excerpt::before {
+  content:''; position:absolute; left:0; top:0; bottom:0; width:3px;
+  background:linear-gradient(180deg,var(--cyan),var(--pink));
+}
+.wp-excerpt-ch {
+  font-family:'Share Tech Mono',monospace; font-size:0.65rem;
+  letter-spacing:4px; color:var(--cyan); text-transform:uppercase; margin-bottom:10px;
+}
+.wp-excerpt-title {
+  font-family:'Orbitron',sans-serif; font-size:1.1rem; font-weight:800;
+  color:var(--text); margin-bottom:14px;
+}
+.wp-excerpt-body {
+  color:var(--muted); line-height:1.8; font-size:0.92rem;
+}
+.wp-excerpt-body strong { color:var(--text); }
+
+/* =============================================
+   FOOTER
+   ============================================= */
+.disclaimer {
+  text-align:center; padding:20px 40px;
+  font-family:'Share Tech Mono',monospace; font-size:0.6rem;
+  color:rgba(136,112,170,0.4); letter-spacing:1px; line-height:1.6;
+  max-width:800px; margin:0 auto;
+  border-top:1px solid rgba(0,240,255,0.05);
+}
+footer {
+  padding:48px 60px 32px; border-top:1px solid var(--border);
+  display:flex; flex-direction:column; align-items:center; gap:20px; text-align:center;
+}
+.footer-logo { font-family:'Orbitron',sans-serif; font-size:1.1rem; font-weight:700; color:var(--cyan); }
+.footer-links { display:flex; gap:24px; list-style:none; }
+.footer-links a { color:var(--muted); text-decoration:none; font-size:0.85rem; transition:color 0.2s; }
+.footer-links a:hover { color:var(--cyan); }
+.footer-copy { font-family:'Share Tech Mono',monospace; font-size:0.65rem; color:var(--muted); letter-spacing:2px; }
+
+/* =============================================
+   MOBILE
+   ============================================= */
+@media (max-width:768px) {
+  #topnav { padding:0 14px; }
+  #nav-menu { display:none; }
+  #burger { display:flex; }
+  .content-wrap { padding:0 16px; }
+  .page-hero { padding:130px 16px 60px; }
+  .tl-items { grid-template-columns:1fr; }
+  .tl-card { padding:24px 20px; }
+  .tl-phase { padding-left:60px; }
+  .timeline::before { left:18px; }
+  .tl-dot { left:8px; }
+  .milestone-strip { flex-direction:column; text-align:center; padding:28px 20px; }
+  .ms-right { text-align:center; }
+  .ms-countdown { justify-content:center; }
+  .wp-hero-inner { flex-direction:column; padding:28px 20px; gap:28px; }
+  .wp-chapters-grid { grid-template-columns:1fr; }
+  .wp-facts-grid { grid-template-columns:1fr 1fr; }
+  .tab-btn { padding:12px 20px; font-size:0.68rem; letter-spacing:2px; }
+  footer { padding:40px 16px 24px; }
+  .footer-links { flex-wrap:wrap; justify-content:center; }
+}
+@media (max-width:400px) {
+  .wp-facts-grid { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- LIVE BANNER -->
+<div id="live-banner">
+  <div class="dot"></div>
+  <span class="txt">🏠 HappyHouseToken — Live on Solana</span>
+</div>
+
+<!-- NAV -->
+<nav id="topnav">
+  <a id="nav-logo" href="index.html">
+    <img src="3873.png" alt="HHT" onerror="this.style.display='none'">
+    HHT
+  </a>
+  <ul id="nav-menu">
+    <li><a href="#section-roadmap" class="active" onclick="switchTab('roadmap',event)">Roadmap</a></li>
+    <li><a href="#section-whitepaper" onclick="switchTab('whitepaper',event)">Whitepaper</a></li>
+    <li><a href="index.html">← Back to Home</a></li>
+  </ul>
+  <button id="burger" aria-label="Menu"><span></span><span></span><span></span></button>
+</nav>
+
+<!-- MOBILE DRAWER -->
+<div id="drawer">
+  <a href="#" onclick="switchTab('roadmap',event);closeDrawer()">📍 Roadmap</a>
+  <a href="#" onclick="switchTab('whitepaper',event);closeDrawer()">📋 Whitepaper</a>
+  <a href="index.html">🏠 Back to Home</a>
+</div>
+<div id="dimmer"></div>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <div class="page-hero-grid"></div>
+  <div class="page-hero-eyebrow">Official Documentation • $HHT • Solana</div>
+  <h1 class="page-hero-title">
+    <span class="t1">Roadmap &</span>
+    <span class="t2">Whitepaper</span>
+  </h1>
+  <p class="page-hero-sub">THE PLAN. THE VISION. THE HOME.</p>
+
+  <div class="tab-nav">
+    <button class="tab-btn active" id="tab-roadmap" onclick="switchTab('roadmap')">📍 Roadmap</button>
+    <div class="tab-divider"></div>
+    <button class="tab-btn" id="tab-whitepaper" onclick="switchTab('whitepaper')">📋 Whitepaper</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     ROADMAP SECTION
+     ============================================================ -->
+<div id="section-roadmap">
+  <div class="content-wrap">
+
+    <span class="section-eyebrow reveal">Building the HappyHouse</span>
+    <h2 class="section-heading reveal">Brick by<br>Brick.</h2>
+
+    <div class="timeline">
+
+      <!-- PHASE 1 -->
+      <div class="tl-phase reveal">
+        <div class="tl-dot"></div>
+        <span class="tl-phase-tag">Phase 1 — Now</span>
+        <div class="tl-card">
+          <div class="tl-header">
+            <div class="tl-title">Foundation</div>
+            <span class="tl-badge live">⚡ Live Now</span>
+          </div>
+          <ul class="tl-items">
+            <li class="done">Token launched on pump.fun</li>
+            <li class="done">Twitter & Telegram community</li>
+            <li class="done">Branding, website & whitepaper</li>
+            <li class="done">Community games and contests</li>
+            <li>Target: 500 holders</li>
+            <li>HappyHouse rooms launch</li>
+          </ul>
+          <div class="tl-progress">
+            <div class="tl-progress-label"><span>Progress</span><span>65%</span></div>
+            <div class="tl-progress-bar"><div class="tl-progress-fill" style="width:65%"></div></div>
+          </div>
+          <div class="tl-target">TARGET → <span>500 Holders</span></div>
+        </div>
+      </div>
+
+      <!-- PHASE 2 -->
+      <div class="tl-phase reveal">
+        <div class="tl-dot phase2 upcoming"></div>
+        <span class="tl-phase-tag p2">Phase 2 — 1-3 Months</span>
+        <div class="tl-card p2">
+          <div class="tl-header">
+            <div class="tl-title">Growth</div>
+            <span class="tl-badge" style="color:var(--pink);border-color:rgba(255,26,170,0.3);background:rgba(255,26,170,0.08)">Upcoming</span>
+          </div>
+          <ul class="tl-items">
+            <li>Cross-community collaborations</li>
+            <li>Regular giveaways and contests</li>
+            <li>Raydium listing at $69K market cap</li>
+            <li>Influencer marketing push</li>
+            <li>Target: 1,000 holders</li>
+            <li>CoinGecko & CoinMarketCap listing</li>
+          </ul>
+          <div class="tl-progress">
+            <div class="tl-progress-label"><span>Progress</span><span>0%</span></div>
+            <div class="tl-progress-bar"><div class="tl-progress-fill" style="width:0%;background:linear-gradient(90deg,var(--pink),var(--purple))"></div></div>
+          </div>
+          <div class="tl-target" style="color:var(--pink)">TARGET → <span style="color:var(--pink)">1,000 Holders + Raydium</span></div>
+        </div>
+      </div>
+
+      <!-- PHASE 3 -->
+      <div class="tl-phase reveal">
+        <div class="tl-dot phase3 upcoming"></div>
+        <span class="tl-phase-tag p3">Phase 3 — 3-6 Months</span>
+        <div class="tl-card p3">
+          <div class="tl-header">
+            <div class="tl-title">Expansion</div>
+            <span class="tl-badge" style="color:var(--yellow);border-color:rgba(255,233,0,0.3);background:rgba(255,233,0,0.06)">Planned</span>
+          </div>
+          <ul class="tl-items">
+            <li>HappyHouse Arcade gaming platform</li>
+            <li>Monthly tournaments with $HHT prizes</li>
+            <li>Community voting system</li>
+            <li>NFT collection for HappyHouse members</li>
+            <li>Target: 5,000 holders</li>
+            <li>First official Solana partnerships</li>
+          </ul>
+          <div class="tl-progress">
+            <div class="tl-progress-label"><span>Progress</span><span>0%</span></div>
+            <div class="tl-progress-bar"><div class="tl-progress-fill" style="width:0%;background:linear-gradient(90deg,var(--yellow),var(--orange))"></div></div>
+          </div>
+          <div class="tl-target" style="color:var(--yellow)">TARGET → <span style="color:var(--yellow)">5,000 Holders</span></div>
+        </div>
+      </div>
+
+      <!-- PHASE 4 -->
+      <div class="tl-phase reveal">
+        <div class="tl-dot phase4 upcoming"></div>
+        <span class="tl-phase-tag p4">Phase 4 — 6-12 Months</span>
+        <div class="tl-card p4">
+          <div class="tl-header">
+            <div class="tl-title">The Home</div>
+            <span class="tl-badge" style="color:var(--orange);border-color:rgba(255,120,0,0.3);background:rgba(255,120,0,0.06)">Vision</span>
+          </div>
+          <ul class="tl-items">
+            <li>HappyHouse DAO governance</li>
+            <li>Official Solana project partnerships</li>
+            <li>$HHT merchandise store</li>
+            <li>CEX exchange listings</li>
+            <li>Top 100 Solana meme coins</li>
+            <li>HappyHouse mobile app</li>
+          </ul>
+          <div class="tl-progress">
+            <div class="tl-progress-label"><span>Progress</span><span>0%</span></div>
+            <div class="tl-progress-bar"><div class="tl-progress-fill" style="width:0%;background:linear-gradient(90deg,var(--orange),var(--yellow))"></div></div>
+          </div>
+          <div class="tl-target" style="color:var(--orange)">TARGET → <span style="color:var(--orange)">Top 100 Solana Meme Coins</span></div>
+        </div>
+      </div>
+
+    </div><!-- /timeline -->
+
+    <!-- MILESTONE STRIP -->
+    <div class="milestone-strip reveal">
+      <div class="ms-left">
+        <div class="ms-label">⚡ Next Major Milestone</div>
+        <div class="ms-value">$69K</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--muted);letter-spacing:2px;margin-top:6px;">Market Cap Target</div>
+        <div class="ms-countdown">
+          <div class="ms-cd-block">
+            <span class="ms-cd-num" id="ms-days">00</span>
+            <span class="ms-cd-unit">Days</span>
+          </div>
+          <span class="ms-cd-sep">:</span>
+          <div class="ms-cd-block">
+            <span class="ms-cd-num" id="ms-hours">00</span>
+            <span class="ms-cd-unit">Hours</span>
+          </div>
+          <span class="ms-cd-sep">:</span>
+          <div class="ms-cd-block">
+            <span class="ms-cd-num" id="ms-mins">00</span>
+            <span class="ms-cd-unit">Mins</span>
+          </div>
+          <span class="ms-cd-sep">:</span>
+          <div class="ms-cd-block">
+            <span class="ms-cd-num" id="ms-secs">00</span>
+            <span class="ms-cd-unit">Secs</span>
+          </div>
+        </div>
+      </div>
+      <div class="ms-right">
+        <div class="ms-desc">
+          When $HHT reaches <span>$69,000 market cap</span>, the token automatically migrates to <span>Raydium DEX</span> — unlocking full decentralized trading and deeper liquidity for all holders.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================
+     WHITEPAPER SECTION
+     ============================================================ -->
+<div id="section-whitepaper">
+  <div class="content-wrap">
+
+    <span class="section-eyebrow reveal">Official Documentation</span>
+    <h2 class="section-heading reveal">The Complete<br>Vision.</h2>
+
+    <!-- Key Facts -->
+    <div class="wp-facts-grid reveal">
+      <div class="wp-fact">
+        <span class="wp-fact-val">v1.0</span>
+        <span class="wp-fact-lbl">Version</span>
+      </div>
+      <div class="wp-fact">
+        <span class="wp-fact-val">10</span>
+        <span class="wp-fact-lbl">Chapters</span>
+      </div>
+      <div class="wp-fact">
+        <span class="wp-fact-val">EN</span>
+        <span class="wp-fact-lbl">Language</span>
+      </div>
+      <div class="wp-fact">
+        <span class="wp-fact-val">2026</span>
+        <span class="wp-fact-lbl">Published</span>
+      </div>
+    </div>
+
+    <!-- Main Document Card -->
+    <div class="wp-hero-card reveal">
+      <div class="wp-hero-inner">
+        <div class="wp-doc-icon">📋</div>
+        <div style="flex:1">
+          <div class="wp-meta-row">
+            <span class="wp-meta-chip">Official Document</span>
+            <span class="wp-meta-chip">Version 1.0 • 2026</span>
+            <span class="wp-meta-chip">Solana Blockchain</span>
+            <span class="wp-meta-chip">Fair Launch</span>
+          </div>
+          <div class="wp-main-title">HappyHouseToken<br>Whitepaper</div>
+          <div class="wp-main-desc">
+            The complete vision, tokenomics, ecosystem and roadmap of the HappyHouseToken project. 
+            Learn everything about $HHT — from our mission to unite all meme coin communities, 
+            to the full HappyHouse ecosystem and long-term strategy. Built on Solana. Built for everyone.
+          </div>
+          <div class="wp-download-row">
+            <a href="HappyHouseToken_Whitepaper_EN.pdf" target="_blank" class="wp-btn-primary">
+              ⬇️ Download PDF
+            </a>
+            <a href="HappyHouseToken_Whitepaper_EN.pdf" target="_blank" class="wp-btn-secondary">
+              👁 Read Online
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chapters -->
+    <span class="section-eyebrow reveal" style="margin-bottom:20px;">Document Contents</span>
+    <div class="wp-chapters-grid reveal">
+      <div class="wp-chapter-card">
+        <span class="wp-ch-num">01</span>
+        <div>
+          <div class="wp-ch-name">Abstract</div>
+          <div class="wp-ch-sub">Executive summary of the project</div>
+        </div>
+      </div>
+      <div class="wp-chapter-card">
+        <span class="wp-ch-num">02</span>
+        <div>
+          <div class="wp-ch-name">Vision & Mission</div>
+          <div class="wp-ch-sub">Why HappyHouseToken exists</div>
+        </div>
+      </div>
+      <div class="wp-chapter-card">
+        <span class="wp-ch-num">03</span>
+        <div>
+          <div class="wp-ch-name">The Problem</div>
+          <div class="wp-ch-sub">Fragmentation in the meme coin space</div>
+        </div>
+      </div>
+      <div class="wp-chapter-card">
+        <span class="wp-ch-num">04</span>
+        <div>
+          <div class="wp-ch-name">The Solution</div>
+          <div class="wp-ch-sub">One home for all meme coin communities</div>
+        </div>
+      </div>
+      <div class="wp-chapter-card">
+        <span class="wp-ch-num">05</span>
+        <div>
+          <div class="wp-ch-name">Ecosystem</div>
+          <div class="wp-ch-sub">Rooms, Arena, Kitchen, Garage & more</div>
+        </div>
+      </div>
+      <div class="wp-chapter-card">
+        <span class="wp-ch-num">06</span>
+        <div>
+          <div class="wp-ch-name">Tokenomics</div>
+          <div class="wp-ch-sub">1B supply, 0% team, fair launch</div>
+        </div>
+      </div>
+      <div class="wp-chapter-card">
+        <span class="wp-ch-num">07</span>
+        <div>
+          <div class="wp-ch-name">Roadmap</div>
+          <div class="wp-ch-sub">4 phases, brick by brick</div>
+        </div>
+      </div>
+      <div class="wp-chapter-card">
+        <span class="wp-ch-num">08</span>
+        <div>
+          <div class="wp-ch-name">Community Strategy</div>
+          <div class="wp-ch-sub">How we grow the neighborhood</div>
+        </div>
+      </div>
+      <div class="wp-chapter-card">
+        <span class="wp-ch-num">09</span>
+        <div>
+          <div class="wp-ch-name">Technology</div>
+          <div class="wp-ch-sub">Solana, pump.fun, Raydium DEX</div>
+        </div>
+      </div>
+      <div class="wp-chapter-card">
+        <span class="wp-ch-num">10</span>
+        <div>
+          <div class="wp-ch-name">Disclaimer</div>
+          <div class="wp-ch-sub">Legal & risk disclosure</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Excerpts -->
+    <div style="margin-top:48px;">
+      <span class="section-eyebrow reveal" style="margin-bottom:24px;">Document Preview</span>
+
+      <div class="wp-excerpt reveal">
+        <div class="wp-excerpt-ch">Chapter 01 — Abstract</div>
+        <div class="wp-excerpt-title">What is HappyHouseToken?</div>
+        <div class="wp-excerpt-body">
+          <strong>HappyHouseToken ($HHT)</strong> is a community-driven meme coin built on the Solana blockchain, launched through pump.fun. Unlike typical meme coins that serve a single community, $HHT is designed to be <strong>the home for all meme coin communities</strong> — a shared space where DOGE holders, PEPE fans, SHIB enthusiasts, and every other meme coin community can come together as neighbors.
+        </div>
+      </div>
+
+      <div class="wp-excerpt reveal">
+        <div class="wp-excerpt-ch">Chapter 02 — Vision & Mission</div>
+        <div class="wp-excerpt-title">The HappyHouse Philosophy</div>
+        <div class="wp-excerpt-body">
+          The crypto space has given us thousands of meme coins. Each with their own community, their own culture, their own jokes. But they all live in isolation. <strong>DOGE has a street. PEPE has a pond. SHIB has a yard.</strong> But every meme coin needs a real home. HappyHouseToken is that home — a place where the entire meme coin universe can gather, play, build and thrive together.
+        </div>
+      </div>
+
+      <div class="wp-excerpt reveal">
+        <div class="wp-excerpt-ch">Chapter 06 — Tokenomics</div>
+        <div class="wp-excerpt-title">Fair, Simple & Transparent</div>
+        <div class="wp-excerpt-body">
+          $HHT launched with a <strong>total supply of 1,000,000,000 tokens</strong>. There is <strong>zero team allocation</strong>, zero pre-mine, and zero insider advantage. Every token was made available to the public through pump.fun's fair launch mechanism. The token will migrate to Raydium DEX automatically upon reaching a $69,000 market cap, providing full liquidity and decentralized trading for all holders.
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div style="text-align:center; padding:60px 0 20px;" class="reveal">
+      <a href="HappyHouseToken_Whitepaper_EN.pdf" target="_blank" class="wp-btn-primary" style="font-size:1rem; padding:18px 40px;">
+        ⬇️ Download Full Whitepaper (PDF)
+      </a>
+    </div>
+
+  </div>
+</div>
+
+<!-- DISCLAIMER -->
+<div class="disclaimer">
+  ⚠️ $HHT is a meme coin created for entertainment purposes. Crypto assets are highly volatile and speculative. 
+  Never invest more than you can afford to lose. This is not financial advice. 
+  Always do your own research (DYOR) before purchasing any cryptocurrency.
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">🏠 HappyHouseToken</div>
+  <ul class="footer-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="https://twitter.com" target="_blank">Twitter / X</a></li>
+    <li><a href="https://t.me/HappyHouseToken" target="_blank">Telegram</a></li>
+    <li><a href="hht-arena.html">Arena</a></li>
+  </ul>
+  <div class="footer-copy">$HHT • Solana • 2026</div>
+</footer>
+
+<script>
+// ---- TAB SWITCHING ----
+function switchTab(tab, e) {
+  if (e) e.preventDefault();
+  var roadmap = document.getElementById('section-roadmap');
+  var whitepaper = document.getElementById('section-whitepaper');
+  var tabR = document.getElementById('tab-roadmap');
+  var tabW = document.getElementById('tab-whitepaper');
+
+  if (tab === 'roadmap') {
+    roadmap.style.display = 'block';
+    whitepaper.style.display = 'none';
+    tabR.classList.add('active');
+    tabW.classList.remove('active');
+  } else {
+    roadmap.style.display = 'none';
+    whitepaper.style.display = 'block';
+    tabR.classList.remove('active');
+    tabW.classList.add('active');
+    // re-trigger reveals
+    triggerReveals();
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ---- BURGER ----
+var burger = document.getElementById('burger');
+var drawer = document.getElementById('drawer');
+var dimmer = document.getElementById('dimmer');
+function openDrawer()  { drawer.style.display='block'; dimmer.style.display='block'; }
+function closeDrawer() { drawer.style.display='none';  dimmer.style.display='none'; }
+burger.addEventListener('click', function() {
+  drawer.style.display === 'block' ? closeDrawer() : openDrawer();
+});
+dimmer.addEventListener('click', closeDrawer);
+
+// ---- SCROLL REVEAL ----
+function triggerReveals() {
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.reveal:not(.visible)').forEach(function(el) {
+    observer.observe(el);
+  });
+}
+triggerReveals();
+
+// ---- COUNTDOWN ----
+(function() {
+  var target = new Date();
+  target.setDate(target.getDate() + 30);
+  function update() {
+    var diff = target - new Date();
+    if (diff <= 0) return;
+    document.getElementById('ms-days').textContent  = String(Math.floor(diff/86400000)).padStart(2,'0');
+    document.getElementById('ms-hours').textContent = String(Math.floor((diff%86400000)/3600000)).padStart(2,'0');
+    document.getElementById('ms-mins').textContent  = String(Math.floor((diff%3600000)/60000)).padStart(2,'0');
+    document.getElementById('ms-secs').textContent  = String(Math.floor((diff%60000)/1000)).padStart(2,'0');
+  }
+  update(); setInterval(update, 1000);
+})();
+</script>
+</body>
+</html>
