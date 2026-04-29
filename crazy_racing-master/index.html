@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>HHT Racing — HappyHouseToken</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+	<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+	<style>
+	* { margin:0; padding:0; box-sizing:border-box; }
+	html, body { width:100%; height:100%; background:#000; overflow:hidden; }
+
+	#hht-nav {
+		position: fixed; top:0; left:0; right:0;
+		height: 48px;
+		background: rgba(6,6,18,0.97);
+		border-bottom: 1px solid rgba(255,107,0,0.25);
+		display: flex; align-items: center; justify-content: space-between;
+		padding: 0 20px;
+		z-index: 99999;
+	}
+	#hht-nav a.logo {
+		font-family: 'Orbitron', sans-serif;
+		font-size: .78rem; font-weight: 700;
+		color: #ffd600; text-decoration: none;
+		display: flex; align-items: center; gap: 8px;
+		letter-spacing: 2px;
+	}
+	#hht-nav a.logo img { height: 22px; width: auto; filter: drop-shadow(0 0 6px rgba(255,214,0,.5)); }
+	#hht-nav .nav-right { display: flex; align-items: center; gap: 12px; }
+	#hht-nav a.back {
+		font-family: 'Orbitron', sans-serif; font-size: .75rem; font-weight: 600;
+		color: rgba(255,255,255,0.4); text-decoration: none; letter-spacing: 1px; transition: color .2s;
+	}
+	#hht-nav a.back:hover { color: #00e5ff; }
+	#hht-nav a.buy {
+		font-family: 'Orbitron', sans-serif; font-size: .75rem; font-weight: 700;
+		color: #000; background: #ffd600; padding: 8px 18px; border-radius: 20px;
+		text-decoration: none; letter-spacing: 1px; white-space: nowrap;
+	}
+
+	@media (max-width: 480px) {
+		#hht-nav { padding: 0 14px; height: 44px; }
+		#hht-nav a.logo img { height: 18px; }
+		#hht-nav a.logo .logo-text { display: none; }
+		#hht-nav a.buy { font-size: .55rem; padding: 6px 12px; }
+		#hht-nav a.back { font-size: .55rem; }
+		#hht-nav a.back .back-full { display: none; }
+		#hht-nav a.back .back-short { display: inline; }
+	}
+	@media (min-width: 481px) {
+		#hht-nav a.back .back-short { display: none; }
+		#hht-nav a.back .back-full { display: inline; }
+		#hht-nav a.logo .logo-text { display: inline; }
+	}
+
+	#mylegend {
+		position: fixed;
+		top: 48px; left: 0; right: 0; bottom: 0;
+		background: #000;
+	}
+	@media (max-width: 480px) {
+		#mylegend { top: 44px; }
+	}
+	</style>
+	<script type="text/javascript" src="./lib/lufylegend-1.9.7.simple.min.js"></script>
+	<script type="text/javascript" src="./js/ytMain.js"></script>
+</head>
+<body>
+
+<div id="hht-nav">
+	<a href="../index.html" class="logo">
+		<img src="../3873.png" alt="HHT">
+		<span class="logo-text">HHT</span>
+	</a>
+	<div class="nav-right">
+		<a href="../hht-arena.html" class="back">
+			<span class="back-short">←</span>
+			<span class="back-full">← Arena</span>
+		</a>
+		<a href="https://pump.fun/coin/4KrNyA5FpFGQj4jQZh1yKzBkobq7mGVftWYVWjfwpump" target="_blank" class="buy">🚀 Buy $HHT</a>
+	</div>
+</div>
+
+<div id="mylegend">Loading……</div>
+
+<script>
+var GAME_W = 400;
+var GAME_H = 600;
+
+function centerAndScale() {
+	var navH = window.innerWidth <= 480 ? 44 : 48;
+	var availW = window.innerWidth;
+	var availH = window.innerHeight - navH;
+
+	var scale = Math.min(availW / GAME_W, availH / GAME_H);
+	if (!/Mobi|Android/i.test(navigator.userAgent)) {
+		scale = Math.min(scale, 2);
+	}
+
+	var scaledW = GAME_W * scale;
+	var scaledH = GAME_H * scale;
+	var offsetX = Math.floor((availW - scaledW) / 2);
+	var offsetY = Math.floor((availH - scaledH) / 2);
+
+	var canvas = document.querySelector('#mylegend canvas');
+	if (!canvas) return;
+
+	canvas.style.transformOrigin = '0 0';
+	canvas.style.transform = 'scale(' + scale + ')';
+	canvas.style.marginLeft = offsetX + 'px';
+	canvas.style.marginTop  = offsetY + 'px';
+}
+
+var interval = setInterval(function() {
+	var canvas = document.querySelector('#mylegend canvas');
+	if (canvas) {
+		centerAndScale();
+		clearInterval(interval);
+		window.addEventListener('resize', centerAndScale);
+	}
+}, 150);
+</script>
+
+</body>
+</html>
