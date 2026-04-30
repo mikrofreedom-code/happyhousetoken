@@ -31,6 +31,8 @@
     #hero {
       position: relative;
       width: 100%;
+      /* Use padding-top based on image aspect ratio to maintain proportions */
+      /* Image is landscape, we want it to fill nicely */
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -47,16 +49,16 @@
       z-index: 0;
     }
 
-    /* dark overlay so text stays readable */
+    /* dark overlay */
     #hero-bg::after {
       content: '';
       position: absolute;
       inset: 0;
       background: linear-gradient(
         to bottom,
-        rgba(3,5,15,0.45) 0%,
-        rgba(3,5,15,0.15) 40%,
-        rgba(3,5,15,0.55) 100%
+        rgba(3,5,15,0.4) 0%,
+        rgba(3,5,15,0.1) 35%,
+        rgba(3,5,15,0.5) 100%
       );
     }
 
@@ -124,49 +126,51 @@
     }
     .social-btn svg { width: 16px; height: 16px; fill: currentColor; }
 
-    /* ── BUILDING HOTSPOTS ── */
+    /* ── BUILDING HOTSPOTS — absolute positioned over image ── */
     #buildings {
-      position: relative;
+      position: absolute;
+      inset: 0;
       z-index: 10;
-      width: 100%;
-      flex: 1;
-      display: grid;
-      /* 6 columns for 6 buildings */
-      grid-template-columns: repeat(6, 1fr);
-      align-items: end;
-      padding-bottom: clamp(80px, 14vw, 160px);
-      margin-top: auto;
+      pointer-events: none;
     }
 
     .building-link {
+      position: absolute;
       display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-end;
+      align-items: flex-start;
+      justify-content: center;
       text-decoration: none;
-      padding: clamp(60px, 12vw, 130px) 4px 12px;
-      position: relative;
-      transition: transform 0.25s ease;
+      pointer-events: all;
+      transition: filter 0.2s;
+      cursor: pointer;
     }
-    .building-link:hover { transform: translateY(-6px); }
+    .building-link:hover { filter: brightness(1.2); }
+
+    /* Exact % positions from measured data */
+    .b-arena   { left: 2.9%;  top: 18.1%; width: 20.3%; height: 54.3%; }
+    .b-crypto  { left: 30.3%; top: 21.6%; width: 10.3%; height: 49.6%; }
+    .b-library { left: 46.6%; top: 30.4%; width: 10.6%; height: 41.4%; }
+    .b-kitchen { left: 63.5%; top: 37.5%; width: 7.1%;  height: 34.6%; }
+    .b-living  { left: 74.2%; top: 46.6%; width: 9.9%;  height: 29.1%; }
+    .b-garage  { left: 86.5%; top: 35.8%; width: 9.8%;  height: 39.5%; }
 
     .building-label {
       font-family: 'Orbitron', sans-serif;
-      font-size: clamp(0.55rem, 1.3vw, 0.9rem);
+      font-size: clamp(0.4rem, 1.1vw, 0.8rem);
       font-weight: 700;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.06em;
       text-align: center;
-      line-height: 1.25;
-      padding: 6px 10px;
+      line-height: 1.2;
+      padding: 4px 8px;
       border-radius: 6px;
       border: 1px solid transparent;
-      background: rgba(0,0,0,0.5);
+      background: rgba(0,0,0,0.6);
       backdrop-filter: blur(6px);
       transition: box-shadow 0.2s, border-color 0.2s;
       white-space: nowrap;
+      margin-top: 6px;
     }
 
-    /* per-building colours matching the screenshot */
     .b-arena   .building-label { color: #c77dff; border-color: rgba(199,125,255,0.4); }
     .b-arena:hover   .building-label { box-shadow: 0 0 16px rgba(199,125,255,0.6); border-color: #c77dff; }
 
@@ -185,10 +189,9 @@
     .b-garage  .building-label { color: var(--neon-gold); border-color: rgba(255,215,0,0.35); }
     .b-garage:hover  .building-label { box-shadow: 0 0 16px rgba(255,215,0,0.55); border-color: var(--neon-gold); }
 
-    /* ── AD BANNER (above garage / right side) ── */
+    /* ── AD BANNER — above Garage, right side ── */
     #ad-wrapper {
       position: absolute;
-      /* align to garage column = col 6, roughly right 1/6 */
       right: clamp(6px, 2vw, 32px);
       top: clamp(60px, 10vw, 120px);
       z-index: 20;
@@ -235,7 +238,6 @@
       text-shadow: 0 0 24px var(--neon-cyan);
     }
 
-    /* timeline dots */
     .roadmap-dots {
       display: flex;
       gap: clamp(18px, 5vw, 60px);
@@ -257,15 +259,15 @@
       transform: translateY(-50%);
     }
     .dot:last-child::before { display:none; }
-    .dot.cyan  { border-color: var(--neon-cyan);   box-shadow: 0 0 8px var(--neon-cyan); }
+    .dot.cyan  { border-color: var(--neon-cyan);  box-shadow: 0 0 8px var(--neon-cyan); }
     .dot.cyan::before  { background: var(--neon-cyan); }
-    .dot.teal  { border-color: #00ffcc;             box-shadow: 0 0 8px #00ffcc; }
+    .dot.teal  { border-color: #00ffcc;            box-shadow: 0 0 8px #00ffcc; }
     .dot.teal::before  { background: #00ffcc; }
-    .dot.amber { border-color: var(--neon-gold);    box-shadow: 0 0 8px var(--neon-gold); }
+    .dot.amber { border-color: var(--neon-gold);   box-shadow: 0 0 8px var(--neon-gold); }
     .dot.amber::before { background: var(--neon-gold); }
-    .dot.red   { border-color: var(--neon-pink);    box-shadow: 0 0 8px var(--neon-pink); }
+    .dot.red   { border-color: var(--neon-pink);   box-shadow: 0 0 8px var(--neon-pink); }
     .dot.red::before   { background: var(--neon-pink); }
-    .dot.green { border-color: var(--neon-green);   box-shadow: 0 0 8px var(--neon-green); }
+    .dot.green { border-color: var(--neon-green);  box-shadow: 0 0 8px var(--neon-green); }
     .dot.green::before { background: var(--neon-green); }
 
     /* ── FOOTER ── */
@@ -304,40 +306,31 @@
 
     /* ── MOBILE ── */
     @media (max-width: 700px) {
-      #buildings {
-        grid-template-columns: repeat(3, 1fr);
-        grid-template-rows: auto auto;
-        padding-bottom: clamp(50px, 10vw, 90px);
-        gap: 4px;
+      #hero-bg {
+        background-position: center 20%;
       }
 
-      /* reorder so top row = Arena, Crypto, Library; bottom = Kitchen, Living, Garage */
-      .b-arena   { order: 1; }
-      .b-crypto  { order: 2; }
-      .b-library { order: 3; }
-      .b-kitchen { order: 4; }
-      .b-living  { order: 5; }
-      .b-garage  { order: 6; }
+      /* on mobile scale labels down more */
+      .building-label {
+        font-size: clamp(0.32rem, 2.2vw, 0.6rem);
+        padding: 3px 5px;
+      }
 
-      .building-link { padding-top: 30px; }
-
+      /* banner goes below hero on mobile */
       #ad-wrapper {
         position: relative;
         right: auto; top: auto;
-        max-width: 90%;
+        max-width: 94%;
         margin: 12px auto 0;
-        order: 7;
+        z-index: 10;
       }
 
-      /* on mobile put ad below buildings */
-      #hero { flex-direction: column; }
-
-      .roadmap-dots { gap: 10px; }
+      .roadmap-dots { gap: 8px; }
     }
 
     @media (max-width: 420px) {
-      .building-label { font-size: 0.45rem; padding: 4px 6px; }
       #logo h1 { font-size: 2rem; }
+      #logo p  { font-size: 0.55rem; }
     }
   </style>
 </head>
@@ -346,7 +339,6 @@
 <!-- ══ HERO ══ -->
 <section id="hero">
 
-  <!-- external background image -->
   <div id="hero-bg"></div>
 
   <!-- Logo -->
@@ -355,32 +347,28 @@
     <p>Happy House Token ✦</p>
   </div>
 
-  <!-- Social -->
+  <!-- Socials -->
   <div id="socials">
     <a class="social-btn" href="https://t.me/HappyHouseToken" target="_blank" rel="noopener">
-      <!-- Telegram icon -->
       <svg viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.17 13.995l-2.938-.916c-.638-.203-.65-.638.136-.943l11.57-4.461c.533-.194 1 .131.956.546z"/></svg>
       Telegram
     </a>
     <a class="social-btn" href="https://x.com/HappyHouseToken" target="_blank" rel="noopener">
-      <!-- X icon -->
       <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
       X / Twitter
     </a>
   </div>
 
-  <!-- Ad banner — positioned above GARAGE (right side) on desktop, below buildings on mobile -->
+  <!-- Ad banner -->
   <div id="ad-wrapper">
-    <!-- BEGIN AADS AD UNIT 2436103 -->
     <div id="frame" style="width:100%;margin:auto;position:relative;z-index:99998;">
       <iframe data-aa='2436103' src='//acceptable.a-ads.com/2436103/?size=Adaptive'
         style='border:0;padding:0;width:100%;height:auto;overflow:hidden;display:block;margin:auto'
         allowtransparency="true" scrolling="no"></iframe>
     </div>
-    <!-- END AADS AD UNIT 2436103 -->
   </div>
 
-  <!-- Building hotspots -->
+  <!-- Building hotspots — absolutely positioned over image -->
   <nav id="buildings" aria-label="Sections">
 
     <a class="building-link b-arena" href="hht-arena.html">
@@ -404,7 +392,7 @@
     </a>
 
     <a class="building-link b-garage" href="hht-garage.html">
-      <span class="building-label">GARAGE<br><small style="font-size:0.7em;opacity:0.8">(MARKET PLACE)</small></span>
+      <span class="building-label">GARAGE<br><small style="font-size:0.75em;opacity:0.85">(MARKET PLACE)</small></span>
     </a>
 
   </nav>
